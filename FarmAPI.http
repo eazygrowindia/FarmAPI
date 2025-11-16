@@ -1,0 +1,16 @@
+@FarmAPI_HostAddress = https://localhost:7252
+
+GET {{FarmAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+###
+
+GET {{FarmAPI_HostAddress}}/api/Owner/
+Accept: application/json
+###
+
+GET {{FarmAPI_HostAddress}}/api/Owner/{{ownerId}}
+Accept: application/json
+###
+GET {{FarmAPI_HostAddress}}/api/owner
+
+###
