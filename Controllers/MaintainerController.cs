@@ -1,4 +1,5 @@
 ﻿using FarmAPI.Models;
+using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,50 +18,80 @@ namespace FarmAPI.Controllers
         public async Task<List<Maintainer>> Get() =>
             await _maintainerService.GetAsync();
 
-        [HttpGet("{id:length(24)}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Maintainer>> Get(string id)
         {
-            var maintainer = await _maintainerService.GetAsync(id);
+            var existingMaintainer = await _maintainerService.GetAsync(id);
 
-            if (maintainer is null)
+            if (existingMaintainer is null)
             {
                 return NotFound();
             }
 
-            return maintainer;
+            return existingMaintainer;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Maintainer newMaintainer)
+        public async Task<IActionResult> Create([FromBody]CreateMaintainerDto newMaintainerDto)
         {
+            var newMaintainer = new Maintainer
+            {
+                MaintainerId = newMaintainerDto.MaintainerId,
+                MaintainerName = newMaintainerDto.MaintainerName,
+                ContactNumber = newMaintainerDto.ContactNumber,
+                AlternateContactNumber = newMaintainerDto.AlternateContactNumber,
+                Address = newMaintainerDto.Address,
+                IdentityProofDocument = newMaintainerDto.IdentityProofDocument,
+                IdentityProofNumber = newMaintainerDto.IdentityProofNumber,
+                FarmsMaintained = newMaintainerDto.FarmsMaintained,
+                Role = newMaintainerDto.Role,
+                SystemStatus = "Active"
+            };
+
+            var existingMaintainer = await _maintainerService.GetAsync(newMaintainer.MaintainerId);
+            if(existingMaintainer != null)
+            {
+                var problem = new ProblemDetails
+                {
+                    Title = "Item already exists",
+                    Detail = $"A newMaintainer with MaintainerId '{newMaintainer.MaintainerId}' already exists.",
+                    Status = StatusCodes.Status400BadRequest,
+                    Instance = HttpContext.Request.Path
+                };
+                return BadRequest(problem);
+            }
+
             await _maintainerService.CreateAsync(newMaintainer);
 
             return CreatedAtAction(nameof(Get), new { id = newMaintainer.Id }, newMaintainer);
         }
 
-        [HttpPut("{id:length(24)}")]
-        public async Task<IActionResult> Update(string id, Maintainer updatedMaintainer)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] UpdateMaintainerDto updatedMaintainerDto)
         {
-            var maintainer = await _maintainerService.GetAsync(id);
+            var existingMaintainer = await _maintainerService.GetAsync(id);
+            if (existingMaintainer == null) return NotFound();
 
-            if (maintainer is null)
-            {
-                return NotFound();
-            }
+            existingMaintainer.MaintainerName = updatedMaintainerDto.MaintainerName;
+            existingMaintainer.Address = updatedMaintainerDto.Address;
+            existingMaintainer.ContactNumber = updatedMaintainerDto.ContactNumber;
+            existingMaintainer.AlternateContactNumber = updatedMaintainerDto.AlternateContactNumber;
+            existingMaintainer.IdentityProofDocument = updatedMaintainerDto.IdentityProofDocument;
+            existingMaintainer.IdentityProofNumber = updatedMaintainerDto.IdentityProofNumber;
+            existingMaintainer.FarmsMaintained = updatedMaintainerDto.FarmsMaintained;
+            existingMaintainer.Role = updatedMaintainerDto.Role;
+            existingMaintainer.SystemStatus = updatedMaintainerDto.SystemStatus;
 
-            updatedMaintainer.Id = maintainer.Id;
-
-            await _maintainerService.UpdateAsync(id, updatedMaintainer);
-
+            await _maintainerService.UpdateAsync(id, existingMaintainer);
             return NoContent();
         }
 
-        [HttpDelete("{id:length(24)}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var maintainer = await _maintainerService.GetAsync(id);
+            var existingMaintainer = await _maintainerService.GetAsync(id);
 
-            if (maintainer is null)
+            if (existingMaintainer is null)
             {
                 return NotFound();
             }

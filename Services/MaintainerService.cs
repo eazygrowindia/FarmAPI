@@ -25,15 +25,15 @@ namespace FarmAPI.Services
             await _maintainerCollection.Find(_ => true).ToListAsync();
 
         public async Task<Maintainer?> GetAsync(string id) =>
-            await _maintainerCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+            await _maintainerCollection.Find(x => x.MaintainerId == id).FirstOrDefaultAsync();
 
         public async Task CreateAsync(Maintainer newMaintainer) =>
             await _maintainerCollection.InsertOneAsync(newMaintainer);
 
         public async Task UpdateAsync(string id, Maintainer updatedMaintainer) =>
-            await _maintainerCollection.ReplaceOneAsync(x => x.Id == id, updatedMaintainer);
+            await _maintainerCollection.ReplaceOneAsync(x => x.MaintainerId == id, updatedMaintainer);
 
         public async Task RemoveAsync(string id) =>
-            await _maintainerCollection.DeleteOneAsync(x => x.Id == id);
+            await _maintainerCollection.DeleteOneAsync(x => x.MaintainerId == id);
     }
 }

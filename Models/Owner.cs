@@ -9,6 +9,9 @@ namespace FarmAPI.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
 
+        [BsonElement("ownerId")]
+        public string OwnerId { get; set; }
+
         [BsonElement("name")]
         public string OwnerName { get; set; } = null!;
 

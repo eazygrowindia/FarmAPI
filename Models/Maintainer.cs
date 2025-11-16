@@ -9,6 +9,9 @@ namespace FarmAPI.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
 
+        [BsonElement("maintainerId")]
+        public string MaintainerId { get; set; }
+
         [BsonElement("name")]
         public string MaintainerName { get; set; } = null!;
 
@@ -28,7 +31,7 @@ namespace FarmAPI.Models
         public required string IdentityProofNumber { get; set; } = null!;
 
         [BsonElement("farmsMaintained")]
-        public required List<string> FarmsMaintained { get; set; }
+        public List<string> FarmsMaintained { get; set; }
 
         [BsonElement("role")]
         public string Role { get; set; } = null!;

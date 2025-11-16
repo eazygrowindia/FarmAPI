@@ -22,58 +22,58 @@ namespace FarmAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Farm>> Get(string id)
         {
-            var farm = await _farmService.GetAsync(id);
+            var existingFarm = await _farmService.GetAsync(id);
 
-            if (farm is null)
+            if (existingFarm is null)
             {
                 return NotFound();
             }
 
-            return farm;
+            return existingFarm;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateFarmDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateFarmDto newFarmDto)
         {
-            var farm = new Farm
+            var newFarm = new Farm
             {
-                FarmName = dto.FarmName,
-                FarmId = dto.FarmId,
-                Address = dto.Address,
-                GPSLocation = dto.GPSLocation,
-                SizeInSqMtrs = dto.SizeInSqMtrs
+                FarmName = newFarmDto.FarmName,
+                FarmId = newFarmDto.FarmId,
+                Address = newFarmDto.Address,
+                GPSLocation = newFarmDto.GPSLocation,
+                SizeInSqMtrs = newFarmDto.SizeInSqMtrs
             };
 
-            var existing = await _farmService.GetAsync(farm.FarmId);
-            if (existing != null)
+            var existingFarm = await _farmService.GetAsync(newFarm.FarmId);
+            if (existingFarm != null)
             {
                 var problem = new ProblemDetails
                 {
                     Title = "Item already exists",
-                    Detail = $"A farm with FarmId '{farm.FarmId}' already exists.",
+                    Detail = $"A farm with FarmId '{newFarm.FarmId}' already exists.",
                     Status = StatusCodes.Status400BadRequest,
                     Instance = HttpContext.Request.Path                 
                 };
                 return BadRequest(problem);
             }
 
-            await _farmService.CreateAsync(farm);
-            return CreatedAtAction(nameof(Get), new { id = farm.Id }, farm);
+            await _farmService.CreateAsync(newFarm);
+            return CreatedAtAction(nameof(Get), new { id = newFarm.Id }, newFarm);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateFarmDto dto)
+        public async Task<IActionResult> Update(string id, [FromBody] UpdateFarmDto updatedFarmDto)
         {
             // Use route id; ignore any Id/FarmId in body
-            var existing = await _farmService.GetAsync(id);
-            if (existing == null) return NotFound();
+            var existingFarm = await _farmService.GetAsync(id);
+            if (existingFarm == null) return NotFound();
 
-            existing.FarmName = dto.FarmName;
-            existing.Address = dto.Address;
-            existing.GPSLocation = dto.GPSLocation;
-            existing.SizeInSqMtrs = dto.SizeInSqMtrs;
+            existingFarm.FarmName = updatedFarmDto.FarmName;
+            existingFarm.Address = updatedFarmDto.Address;
+            existingFarm.GPSLocation = updatedFarmDto.GPSLocation;
+            existingFarm.SizeInSqMtrs = updatedFarmDto.SizeInSqMtrs;
 
-            await _farmService.UpdateAsync(id, existing);
+            await _farmService.UpdateAsync(id, existingFarm);
             return NoContent();
         }
 
@@ -81,9 +81,9 @@ namespace FarmAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var farm = await _farmService.GetAsync(id);
+            var existingFarm = await _farmService.GetAsync(id);
 
-            if (farm is null)
+            if (existingFarm is null)
             {
                 return NotFound();
             }
