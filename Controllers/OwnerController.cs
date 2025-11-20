@@ -43,6 +43,7 @@ namespace FarmAPI.Controllers
                 ContactNumber = newOwnerDto.ContactNumber,
                 AlternateContactNumber = newOwnerDto.AlternateContactNumber,
                 Address = newOwnerDto.Address,
+                EmailId = newOwnerDto.EmailId,
                 //FarmsOwned = newOwnerDto.FarmsOwned ?? new List<string>(),
                 FarmsOwned = newOwnerDto.FarmsOwned,
                 SystemStatus = "Active"
@@ -83,6 +84,7 @@ namespace FarmAPI.Controllers
             existingOwner.ContactNumber = updatedOwnerDto.ContactNumber;
             existingOwner.AlternateContactNumber = updatedOwnerDto.AlternateContactNumber;
             existingOwner.Address = updatedOwnerDto.Address;
+            existingOwner.EmailId = updatedOwnerDto.EmailId;
             existingOwner.FarmsOwned = updatedOwnerDto.FarmsOwned ?? new List<string>();
             existingOwner.SystemStatus = updatedOwnerDto.SystemStatus;
 

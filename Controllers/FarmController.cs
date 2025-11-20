@@ -41,7 +41,7 @@ namespace FarmAPI.Controllers
                 FarmId = newFarmDto.FarmId,
                 Address = newFarmDto.Address,
                 GPSLocation = newFarmDto.GPSLocation,
-                SizeInSqMtrs = newFarmDto.SizeInSqMtrs
+                ShadeNetArea = newFarmDto.ShadeNetArea
             };
 
             var existingFarm = await _farmService.GetAsync(newFarm.FarmId);
@@ -71,7 +71,7 @@ namespace FarmAPI.Controllers
             existingFarm.FarmName = updatedFarmDto.FarmName;
             existingFarm.Address = updatedFarmDto.Address;
             existingFarm.GPSLocation = updatedFarmDto.GPSLocation;
-            existingFarm.SizeInSqMtrs = updatedFarmDto.SizeInSqMtrs;
+            existingFarm.ShadeNetArea = updatedFarmDto.ShadeNetArea;
 
             await _farmService.UpdateAsync(id, existingFarm);
             return NoContent();

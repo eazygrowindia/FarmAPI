@@ -29,6 +29,18 @@ namespace FarmAPI
             //    c.EnableAnnotations();
             //    // ... other configuration
             //});
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularApp", policy =>
+                {
+                    //policy.WithOrigins("http://localhost:4200")
+                    //      .AllowAnyMethod()
+                    //      .AllowAnyHeader();
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
 
 
             var app = builder.Build();
@@ -39,6 +51,8 @@ namespace FarmAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors("AllowAngularApp");
 
             app.UseHttpsRedirection();
 

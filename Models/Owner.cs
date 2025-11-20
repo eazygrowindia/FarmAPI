@@ -25,7 +25,10 @@ namespace FarmAPI.Models
         public string ContactNumber { get; set; } = null!;
 
         [BsonElement("alternateContactNumber")]
-        public string AlternateContactNumber { get; set; } = null!;
+        public string AlternateContactNumber { get; set; }
+
+        [BsonElement("emailId")]
+        public string? EmailId { get; set; }
 
         [BsonElement("address")]
         public string Address { get; set; } = null!;
