@@ -49,6 +49,8 @@ namespace FarmAPI.Controllers
                 SystemStatus = "Active"
             };
 
+            //TODO: Check based on OwnerId uniqueness is not enough, as it is by default unique.
+            //Check has to be done on OwnerName/FarmerName as well to avoid duplicate farms.
             var existingOwner = await _ownerService.GetAsync(newOwner.OwnerId);
             if (existingOwner != null)
             {

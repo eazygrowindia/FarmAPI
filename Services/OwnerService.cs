@@ -27,6 +27,9 @@ namespace FarmAPI.Services
         public async Task<Owner?> GetAsync(string id) =>
             await _ownerCollection.Find(x => x.OwnerId == id).FirstOrDefaultAsync();
 
+        public async Task<Owner?> GetAsyncByName(string name) =>
+            await _ownerCollection.Find(x => x.OwnerName.ToLower() == name.ToLower()).FirstOrDefaultAsync();
+
         public async Task CreateAsync(Owner newOwner) =>
             await _ownerCollection.InsertOneAsync(newOwner);
 

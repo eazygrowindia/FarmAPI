@@ -39,11 +39,25 @@ namespace FarmAPI.Controllers
             {
                 FarmName = newFarmDto.FarmName,
                 FarmId = newFarmDto.FarmId,
+                SurveyNumber = newFarmDto.SurveyNumber,
                 Address = newFarmDto.Address,
-                GPSLocation = newFarmDto.GPSLocation,
-                ShadeNetArea = newFarmDto.ShadeNetArea
+                ShadeNetArea = newFarmDto.ShadeNetArea,
+                //GeoTag = newFarmDto.GeoTag,
+                FarmPondVolume = newFarmDto.FarmPondVolume,
+                IsSolarPowerAvailable = newFarmDto.IsSolarPowerAvailable,
+                MotorCapacity = newFarmDto.MotorCapacity,
+                AdditionalWaterSource = newFarmDto.AdditionalWaterSource,
+                WaterTestCertificateUrl = newFarmDto.WaterTestCertificateUrl,
+                IsSinglePhasePower = newFarmDto.IsSinglePhasePower,
+                IsThreePhasePower = newFarmDto.IsThreePhasePower,
+                //GridPowerUnAvailability = newFarmDto.GridPowerUnAvailability,
+                AutomationRoomSize = newFarmDto.AutomationRoomSize,
+                //FarmhouseNote = newFarmDto.FarmhouseNote,
+                StorageAreaNote = newFarmDto.StorageAreaNote
             };
 
+            //TODO: Check based on FarmId uniqueness is not enough, as it is by default unique.
+            //Check has to be done on FarmName as well to avoid duplicate farms.
             var existingFarm = await _farmService.GetAsync(newFarm.FarmId);
             if (existingFarm != null)
             {
@@ -69,9 +83,21 @@ namespace FarmAPI.Controllers
             if (existingFarm == null) return NotFound();
 
             existingFarm.FarmName = updatedFarmDto.FarmName;
+            existingFarm.SurveyNumber = updatedFarmDto.SurveyNumber;
             existingFarm.Address = updatedFarmDto.Address;
-            existingFarm.GPSLocation = updatedFarmDto.GPSLocation;
             existingFarm.ShadeNetArea = updatedFarmDto.ShadeNetArea;
+            //existingFarm.GeoTag = updatedFarmDto.GeoTag;
+            existingFarm.FarmPondVolume = updatedFarmDto.FarmPondVolume;
+            existingFarm.IsSolarPowerAvailable = updatedFarmDto.IsSolarPowerAvailable;
+            existingFarm.MotorCapacity = updatedFarmDto.MotorCapacity;
+            existingFarm.AdditionalWaterSource = updatedFarmDto.AdditionalWaterSource;
+            existingFarm.WaterTestCertificateUrl = updatedFarmDto.WaterTestCertificateUrl;
+            existingFarm.IsSinglePhasePower = updatedFarmDto.IsSinglePhasePower;
+            existingFarm.IsThreePhasePower = updatedFarmDto.IsThreePhasePower;
+            //existingFarm.GridPowerUnAvailability = updatedFarmDto.GridPowerUnAvailability;
+            existingFarm.AutomationRoomSize = updatedFarmDto.AutomationRoomSize;
+            //existingFarm.FarmhouseNote = updatedFarmDto.FarmhouseNote;
+            existingFarm.StorageAreaNote = updatedFarmDto.StorageAreaNote;
 
             await _farmService.UpdateAsync(id, existingFarm);
             return NoContent();

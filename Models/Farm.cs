@@ -22,16 +22,11 @@ namespace FarmAPI.Models
         [BsonElement("address")]
         public string Address { get; set; } = null!;
 
-        [BsonElement("gpsLocation")]
-        public string GPSLocation { get; set; } = null!;
-
-        //[BsonElement("sizeSqMtrs")]
-        //public string SizeInSqMtrs { get; set; } = null!;
         /// <summary>
         /// Area covered under shade net in square meters
         /// </summary>
         [BsonElement("shadeNetArea")]
-        public string ShadeNetArea { get; set; } = null!;
+        public double ShadeNetArea { get; set; }
 
         [BsonElement("geoTag")]
         public LatLong GeoTag { get; set; } = null!;
