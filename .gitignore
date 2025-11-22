@@ -62,3 +62,6 @@ nunit-*.xml
 /.vs/FarmAPI.slnx
 /.vs/VSWorkspaceState.json
 /.vs
+
+# Uploads folder
+Uploads
