@@ -41,10 +41,12 @@ namespace FarmAPI.Controllers
                 ContactNumber = newMaintainerDto.ContactNumber,
                 AlternateContactNumber = newMaintainerDto.AlternateContactNumber,
                 Address = newMaintainerDto.Address,
+                Education = newMaintainerDto.Education,
+                TrainingCertificateUrl = newMaintainerDto.TrainingCertificateUrl,
                 IdentityProofDocument = newMaintainerDto.IdentityProofDocument,
                 IdentityProofNumber = newMaintainerDto.IdentityProofNumber,
                 FarmsMaintained = newMaintainerDto.FarmsMaintained,
-                Role = newMaintainerDto.Role,
+                //Role = newMaintainerDto.Role,
                 SystemStatus = "Active"
             };
 
@@ -79,7 +81,7 @@ namespace FarmAPI.Controllers
             existingMaintainer.IdentityProofDocument = updatedMaintainerDto.IdentityProofDocument;
             existingMaintainer.IdentityProofNumber = updatedMaintainerDto.IdentityProofNumber;
             existingMaintainer.FarmsMaintained = updatedMaintainerDto.FarmsMaintained;
-            existingMaintainer.Role = updatedMaintainerDto.Role;
+            //existingMaintainer.Role = updatedMaintainerDto.Role;
             existingMaintainer.SystemStatus = updatedMaintainerDto.SystemStatus;
 
             await _maintainerService.UpdateAsync(id, existingMaintainer);

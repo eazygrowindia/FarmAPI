@@ -14,6 +14,8 @@ namespace FarmAPI.Models.Dtos
         public string IdentityProofNumber { get; set; } = null!;
         public string TrainingCertificateUrl { get; set; }
         public List<string> FarmsMaintained { get; set; } = new List<string>();
-        public string Role { get; set; } = null!;
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

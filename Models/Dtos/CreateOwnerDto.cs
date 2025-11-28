@@ -13,5 +13,8 @@ namespace FarmAPI.Models.Dtos
         public string? EmailId { get; set; }
         public string Address { get; set; } = null!;
         public List<string> FarmsOwned { get; set; } = new List<string>();
+        public List<string> Maintainers { get; set; } = new List<string>();
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -12,7 +12,7 @@ namespace FarmAPI.Models.Dtos
         //public LatLong GeoTag { get; set; }
         public double FarmPondVolume { get; set; }
         public bool? IsSolarPowerAvailable { get; set; }
-        public double? MotorCapacity { get; set; }
+        public string? MotorCapacity { get; set; }
         public string AdditionalWaterSource { get; set; }
         public string? WaterTestCertificateUrl { get; set; }
         public bool? IsSinglePhasePower { get; set; }
@@ -21,5 +21,8 @@ namespace FarmAPI.Models.Dtos
         public double? AutomationRoomSize { get; set; }
         //public FarmhouseNote FarmhouseNote { get; set; }
         public string StorageAreaNote { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

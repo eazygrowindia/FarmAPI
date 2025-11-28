@@ -44,8 +44,8 @@ namespace FarmAPI.Controllers
                 AlternateContactNumber = newOwnerDto.AlternateContactNumber,
                 Address = newOwnerDto.Address,
                 EmailId = newOwnerDto.EmailId,
-                //FarmsOwned = newOwnerDto.FarmsOwned ?? new List<string>(),
                 FarmsOwned = newOwnerDto.FarmsOwned,
+                Maintainers = newOwnerDto.Maintainers,
                 SystemStatus = "Active"
             };
 
@@ -87,7 +87,8 @@ namespace FarmAPI.Controllers
             existingOwner.AlternateContactNumber = updatedOwnerDto.AlternateContactNumber;
             existingOwner.Address = updatedOwnerDto.Address;
             existingOwner.EmailId = updatedOwnerDto.EmailId;
-            existingOwner.FarmsOwned = updatedOwnerDto.FarmsOwned ?? new List<string>();
+            existingOwner.FarmsOwned = updatedOwnerDto.FarmsOwned;
+            existingOwner.Maintainers = updatedOwnerDto.Maintainers;
             existingOwner.SystemStatus = updatedOwnerDto.SystemStatus;
 
             await _ownerService.UpdateAsync(id, existingOwner);

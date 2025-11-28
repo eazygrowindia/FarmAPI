@@ -17,7 +17,7 @@ namespace FarmAPI.Models
         public string FarmId { get; set; }
 
         [BsonElement("surveyNumber")]
-        public string SurveyNumber { get; set; } = null!;
+        public required string SurveyNumber { get; set; } = null!;
 
         [BsonElement("address")]
         public string Address { get; set; } = null!;
@@ -48,7 +48,7 @@ namespace FarmAPI.Models
         /// 1 of the 3 options 1) 5hp 2) 7.5hp 3) 10hp
         /// </summary>
         [BsonElement("motorCapacity")]
-        public double? MotorCapacity { get; set; }
+        public string MotorCapacity { get; set; }
 
         [BsonElement("additionalWaterSource")]
         public string AdditionalWaterSource { get; set; }
@@ -79,5 +79,11 @@ namespace FarmAPI.Models
 
         [BsonElement("storageAreaNote")]
         public string StorageAreaNote { get; set; }
+
+        [BsonElement("createdAt")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [BsonElement("updatedAt")]
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

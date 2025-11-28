@@ -36,7 +36,16 @@ namespace FarmAPI.Models
         [BsonElement("farmsOwned")]
         public List<string> FarmsOwned { get; set; }
 
+        [BsonElement("maintainers")]
+        public List<string> Maintainers { get; set; }
+
         [BsonElement("systemStatus")]
         public string SystemStatus { get; set; } = null!;
+
+        [BsonElement("createdAt")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [BsonElement("updatedAt")]
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

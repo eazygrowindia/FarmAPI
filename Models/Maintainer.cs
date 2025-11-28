@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
 
 namespace FarmAPI.Models
 {
@@ -60,13 +61,19 @@ namespace FarmAPI.Models
         /// <summary>
         /// this determines the access level of the maintainer/assitant in the system
         /// </summary>
-        [BsonElement("role")]
-        public string Role { get; set; } = null!;
+        //[BsonElement("role")]
+        //public string Role { get; set; } = null!;
 
         /// <summary>
         /// denotes whether the record is Active/Inactive in the system
         /// </summary>
         [BsonElement("systemStatus")]
         public string SystemStatus { get; set; } = null!;
+
+        [BsonElement("createdAt")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [BsonElement("updatedAt")]
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }
