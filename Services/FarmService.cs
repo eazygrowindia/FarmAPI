@@ -1,5 +1,6 @@
 ﻿using FarmAPI.Models;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace FarmAPI.Services
@@ -26,6 +27,20 @@ namespace FarmAPI.Services
 
         public async Task<Farm?> GetAsync(string id) =>
             await _farmCollection.Find(x => x.FarmId == id).FirstOrDefaultAsync();
+
+        public async Task<List<FarmPartial>> GetByIdOrName(string searchTerm)
+        {
+            var filter = Builders<Farm>.Filter.Or(
+                Builders<Farm>.Filter.Regex(x => x.FarmId, new BsonRegularExpression(searchTerm, "i")),
+                Builders<Farm>.Filter.Regex(x => x.FarmName, new BsonRegularExpression(searchTerm, "i"))
+            );
+
+            var projection = Builders<Farm>.Projection.Include(f => f.FarmId)
+                                           .Include(f => f.FarmName)
+                                           .Exclude("_id"); // Optional to exclude 
+
+            return await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+        }
 
         public async Task CreateAsync(Farm newFarm) => 
             await _farmCollection.InsertOneAsync(newFarm);

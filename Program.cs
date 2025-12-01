@@ -1,6 +1,8 @@
 
 using FarmAPI.Models;
 using FarmAPI.Services;
+using MongoDB.Driver;
+using System.Text.Json;
 
 namespace FarmAPI
 {
@@ -14,12 +16,19 @@ namespace FarmAPI
             builder.Services.Configure<FarmGrowDatabaseSettings>(
                 builder.Configuration.GetSection("FarmGrowDatabase"));
 
+            //builder.Services.AddSingleton<IMongoClient>(sp => 
+            //    new MongoClient(builder.Configuration.GetConnectionString("MongoDb")));
+
+            //builder.Services.AddScoped<IMongoDatabase>(sp =>
+            //    sp.GetRequiredService<IMongoClient>().GetDatabase("FarmDb"));
+
             builder.Services.AddSingleton<OwnerService>();
             builder.Services.AddSingleton<FarmService>();
             builder.Services.AddSingleton<MaintainerService>();
+            builder.Services.AddSingleton<CropService>();
 
             builder.Services.AddControllers()
-                .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
+                .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

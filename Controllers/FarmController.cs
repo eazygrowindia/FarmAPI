@@ -32,6 +32,17 @@ namespace FarmAPI.Controllers
             return existingFarm;
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<FarmPartial>>> Search([FromQuery] string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2)
+                return BadRequest(new { error = "Search term must be at least 2 characters" });
+
+            var farms = await _farmService.GetByIdOrName(searchTerm.Trim());
+
+            return Ok(farms);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateFarmDto newFarmDto)
         {
