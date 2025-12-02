@@ -18,7 +18,7 @@ namespace FarmAPI.Services
                 farmGrowDatabaseSettings.Value.DatabaseName);
 
             _cropCollection = mongoDatabase.GetCollection<Crop>(
-                farmGrowDatabaseSettings.Value.FarmCollectionName);
+                farmGrowDatabaseSettings.Value.CropCollectionName);
         }
 
         public async Task<List<Crop>> GetAsync() =>

@@ -22,6 +22,9 @@ namespace FarmAPI.Models
         [BsonElement("address")]
         public string Address { get; set; } = null!;
 
+        [BsonElement("crops")]
+        public List<string> Crops { get; set; }
+
         /// <summary>
         /// Area covered under shade net in square meters
         /// </summary>

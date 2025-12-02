@@ -17,7 +17,7 @@ namespace FarmAPI.Models
         public required string CropId { get; set; }
 
         [BsonElement("area")]
-        public required string CropArea { get; set; } = null!;
+        public required double CropArea { get; set; }
 
         [BsonElement("dateOfSowing")]
         public required DateTime DateOfSowing { get; set; }

@@ -45,8 +45,34 @@ namespace FarmAPI.Services
         public async Task CreateAsync(Farm newFarm) => 
             await _farmCollection.InsertOneAsync(newFarm);
 
-        public async Task UpdateAsync(string id, Farm updatedFarm) =>
-            await _farmCollection.ReplaceOneAsync(x => x.FarmId == id, updatedFarm);
+        public async Task UpdateAsync(string id, Farm updatedFarm)
+        {
+            //await _farmCollection.ReplaceOneAsync(x => x.FarmId == id, updatedFarm);
+            var filter = Builders<Farm>.Filter.Eq(x => x.FarmId, id);
+
+            await _farmCollection.FindOneAndUpdateAsync(
+                filter,
+                Builders<Farm>.Update
+                    .Set(f => f.FarmName, updatedFarm.FarmName)
+                    .Set(f => f.SurveyNumber, updatedFarm.SurveyNumber)
+                    .Set(f => f.Address, updatedFarm.Address)
+                    .Set(f => f.ShadeNetArea, updatedFarm.ShadeNetArea)
+                    .Set(f => f.GeoTag, updatedFarm.GeoTag)
+                    .Set(f => f.WeatherData, updatedFarm.WeatherData)
+                    .Set(f => f.FarmPondVolume, updatedFarm.FarmPondVolume)
+                    .Set(f => f.IsSolarPowerAvailable, updatedFarm.IsSolarPowerAvailable)
+                    .Set(f => f.MotorCapacity, updatedFarm.MotorCapacity)
+                    .Set(f => f.AdditionalWaterSource, updatedFarm.AdditionalWaterSource)
+                    .Set(f => f.WaterTestCertificateUrl, updatedFarm.WaterTestCertificateUrl)
+                    .Set(f => f.IsSinglePhasePower, updatedFarm.IsSinglePhasePower)
+                    .Set(f => f.IsThreePhasePower, updatedFarm.IsThreePhasePower)
+                    .Set(f => f.GridPowerUnAvailability, updatedFarm.GridPowerUnAvailability)
+                    .Set(f => f.AutomationRoomSize, updatedFarm.AutomationRoomSize)
+                    .Set(f => f.FarmhouseNote, updatedFarm.FarmhouseNote)
+                    .Set(f => f.StorageAreaNote, updatedFarm.StorageAreaNote)
+                    .Set(f => f.UpdatedAt, DateTime.UtcNow)
+            );
+        }
 
         public async Task RemoveAsync(string id) =>
             await _farmCollection.DeleteOneAsync(x => x.FarmId == id);

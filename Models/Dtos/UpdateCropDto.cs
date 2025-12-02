@@ -7,7 +7,7 @@ namespace FarmAPI.Models.Dtos
     public class UpdateCropDto
     {
         public required string CropName { get; set; } = null!;
-        public required string CropArea { get; set; } = null!;
+        public required double CropArea { get; set; }
         public required DateTime DateOfSowing { get; set; }
         public string ExpectedYield { get; set; }
     }
