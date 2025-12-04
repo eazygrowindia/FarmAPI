@@ -30,8 +30,20 @@ namespace FarmAPI.Services
         public async Task CreateAsync(Crop newCrop) => 
             await _cropCollection.InsertOneAsync(newCrop);
 
-        public async Task UpdateAsync(string id, Crop updatedCrop) =>
-            await _cropCollection.ReplaceOneAsync(x => x.CropId == id, updatedCrop);
+        public async Task UpdateAsync(string id, Crop updatedCrop)
+        {
+            var filter = Builders<Crop>.Filter.Eq(x => x.CropId, id);
+            await _cropCollection.UpdateOneAsync(
+                filter,
+                Builders<Crop>.Update
+                    .Set(c => c.CropName, updatedCrop.CropName)
+                    .Set(c => c.CropArea, updatedCrop.CropArea)
+                    .Set(c => c.DateOfSowing, updatedCrop.DateOfSowing)
+                    .Set(c => c.ExpectedYield, updatedCrop.ExpectedYield)
+                    .Set(c => c.ProbableHarvestDate, updatedCrop.ProbableHarvestDate)
+                    .Set(c => c.UpdatedAt, DateTime.UtcNow)
+            );
+        }
 
         public async Task RemoveAsync(string id) =>
             await _cropCollection.DeleteOneAsync(x => x.CropId == id);

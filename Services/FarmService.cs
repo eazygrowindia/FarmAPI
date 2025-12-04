@@ -28,7 +28,7 @@ namespace FarmAPI.Services
         public async Task<Farm?> GetAsync(string id) =>
             await _farmCollection.Find(x => x.FarmId == id).FirstOrDefaultAsync();
 
-        public async Task<List<FarmPartial>> GetByIdOrName(string searchTerm)
+        public async Task<List<FarmPartial>> GetPartialFarmByIdOrName(string searchTerm)
         {
             var filter = Builders<Farm>.Filter.Or(
                 Builders<Farm>.Filter.Regex(x => x.FarmId, new BsonRegularExpression(searchTerm, "i")),
@@ -42,6 +42,16 @@ namespace FarmAPI.Services
             return await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
         }
 
+        public async Task<List<Farm>> GetFarmByIdOrName(string searchTerm)
+        {
+            var filter = Builders<Farm>.Filter.Or(
+                Builders<Farm>.Filter.Regex(x => x.FarmId, new BsonRegularExpression(searchTerm, "i")),
+                Builders<Farm>.Filter.Regex(x => x.FarmName, new BsonRegularExpression(searchTerm, "i"))
+            );
+
+            return await _farmCollection.Find(filter).ToListAsync();
+        }
+
         public async Task CreateAsync(Farm newFarm) => 
             await _farmCollection.InsertOneAsync(newFarm);
 
@@ -50,7 +60,7 @@ namespace FarmAPI.Services
             //await _farmCollection.ReplaceOneAsync(x => x.FarmId == id, updatedFarm);
             var filter = Builders<Farm>.Filter.Eq(x => x.FarmId, id);
 
-            await _farmCollection.FindOneAndUpdateAsync(
+            await _farmCollection.UpdateOneAsync(
                 filter,
                 Builders<Farm>.Update
                     .Set(f => f.FarmName, updatedFarm.FarmName)
@@ -70,9 +80,20 @@ namespace FarmAPI.Services
                     .Set(f => f.AutomationRoomSize, updatedFarm.AutomationRoomSize)
                     .Set(f => f.FarmhouseNote, updatedFarm.FarmhouseNote)
                     .Set(f => f.StorageAreaNote, updatedFarm.StorageAreaNote)
+                    .Set(f => f.Crops, updatedFarm.Crops)
                     .Set(f => f.UpdatedAt, DateTime.UtcNow)
             );
         }
+
+        //public async Task FindAndUpdateAsync(string id, Farm updatedFarm)
+        //{
+        //    var filter = Builders<Farm>.Filter.Eq(x => x.FarmId, id);
+
+        //    await _farmCollection.FindOneAndUpdateAsync(
+        //        filter,
+        //        Builders<Farm>.Update.Set(f => f.UpdatedAt, DateTime.UtcNow)
+        //        );
+        //}
 
         public async Task RemoveAsync(string id) =>
             await _farmCollection.DeleteOneAsync(x => x.FarmId == id);

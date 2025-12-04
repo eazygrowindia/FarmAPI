@@ -35,12 +35,15 @@ namespace FarmAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCropDto newCropDto)
         {
+            // dto.CropName is guaranteed non-null/empty here
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);  // Returns 400 with errors
+
             var newCrop = new Crop
             {
                 CropName = newCropDto.CropName,
                 CropId = newCropDto.CropId,
                 CropArea = newCropDto.CropArea,
-                ExpectedYield = newCropDto.ExpectedYield,
                 DateOfSowing = newCropDto.DateOfSowing
             };
 
@@ -61,6 +64,7 @@ namespace FarmAPI.Controllers
 
             //TODO : Business logic to calculate ProbableHarvestDate based on Crop type can be added here.
             newCrop.ProbableHarvestDate = newCropDto.DateOfSowing.AddMonths(6);
+            newCrop.ExpectedYield = 25;
 
             await _cropService.CreateAsync(newCrop);
             return CreatedAtAction(nameof(Get), new { id = newCrop.Id }, newCrop);
@@ -69,18 +73,23 @@ namespace FarmAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] UpdateCropDto updatedCropDto)
         {
+            // dto.CropName is guaranteed non-null/empty here
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);  // Returns 400 with errors
+
             // Use route id; ignore any Id/CropId in body
             var existingCrop = await _cropService.GetAsync(id);
             if (existingCrop == null) return NotFound();
 
             existingCrop.CropName = updatedCropDto.CropName;
             existingCrop.CropArea = updatedCropDto.CropArea;
-            existingCrop.ExpectedYield = updatedCropDto.ExpectedYield;
             existingCrop.DateOfSowing = updatedCropDto.DateOfSowing;
 
             //TODO : Business logic to calculate ProbableHarvestDate based on Crop type can be added here.
             if(updatedCropDto.DateOfSowing != existingCrop.DateOfSowing)
                 existingCrop.ProbableHarvestDate = updatedCropDto.DateOfSowing.AddMonths(6);
+
+            existingCrop.ExpectedYield = 25;
 
             await _cropService.UpdateAsync(id, existingCrop);
             return NoContent();

@@ -38,7 +38,7 @@ namespace FarmAPI.Controllers
             if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2)
                 return BadRequest(new { error = "Search term must be at least 2 characters" });
 
-            var farms = await _farmService.GetByIdOrName(searchTerm.Trim());
+            var farms = await _farmService.GetPartialFarmByIdOrName(searchTerm.Trim());
 
             return Ok(farms);
         }
@@ -64,7 +64,8 @@ namespace FarmAPI.Controllers
                 //GridPowerUnAvailability = newFarmDto.GridPowerUnAvailability,
                 AutomationRoomSize = newFarmDto.AutomationRoomSize,
                 //FarmhouseNote = newFarmDto.FarmhouseNote,
-                StorageAreaNote = newFarmDto.StorageAreaNote
+                StorageAreaNote = newFarmDto.StorageAreaNote,
+                Crops = new List<string>()
             };
 
             //TODO: Check based on FarmId uniqueness is not enough, as it is by default unique.
@@ -109,6 +110,12 @@ namespace FarmAPI.Controllers
             existingFarm.AutomationRoomSize = updatedFarmDto.AutomationRoomSize;
             //existingFarm.FarmhouseNote = updatedFarmDto.FarmhouseNote;
             existingFarm.StorageAreaNote = updatedFarmDto.StorageAreaNote;
+
+            if(existingFarm.Crops == null)
+            {
+                existingFarm.Crops = new List<string>();
+            }
+            existingFarm.Crops = updatedFarmDto.Crops;
 
             await _farmService.UpdateAsync(id, existingFarm);
             return NoContent();
