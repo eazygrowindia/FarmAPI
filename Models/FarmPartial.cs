@@ -9,5 +9,11 @@ namespace FarmAPI.Models
 
         [BsonElement("farmId")]
         public string FarmId { get; set; }
+
+        [BsonElement("crops")]
+        public List<string> Crops { get; set; }
+
+        [BsonElement("cropDetail")]
+        public List<CropPartial> CropDetail { get; set; }
     }
 }

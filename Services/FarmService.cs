@@ -8,6 +8,7 @@ namespace FarmAPI.Services
     public class FarmService
     {
         private readonly IMongoCollection<Farm> _farmCollection;
+        private readonly IMongoCollection<Crop> _cropCollection;
 
         public FarmService(
             IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
@@ -20,6 +21,9 @@ namespace FarmAPI.Services
 
             _farmCollection = mongoDatabase.GetCollection<Farm>(
                 farmGrowDatabaseSettings.Value.FarmCollectionName);
+
+            _cropCollection = mongoDatabase.GetCollection<Crop>(
+                farmGrowDatabaseSettings.Value.CropCollectionName);
         }
 
         public async Task<List<Farm>> GetAsync() =>
@@ -37,9 +41,33 @@ namespace FarmAPI.Services
 
             var projection = Builders<Farm>.Projection.Include(f => f.FarmId)
                                            .Include(f => f.FarmName)
+                                           .Include(f => f.Crops)
                                            .Exclude("_id"); // Optional to exclude 
 
-            return await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+            var cropProjection = Builders<Crop>.Projection.Include(f => f.CropId)
+                                           .Include(f => f.CropName)
+                                           .Exclude("_id");
+
+            var farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+
+            foreach (var farm in farmCollection)
+            {
+                var cropDetails = new List<CropPartial>();
+                if (farm.Crops != null && farm.Crops.Count > 0)
+                {
+                    foreach (var cropId in farm.Crops)
+                    {
+                        var crop = await _cropCollection.Find(c => c.CropId == cropId).Project<CropPartial>(cropProjection).FirstOrDefaultAsync();
+                        if (crop != null)
+                        {
+                            cropDetails.Add(crop);
+                        }
+                    }
+                }
+                farm.CropDetail = cropDetails;
+            }
+
+            return farmCollection;
         }
 
         public async Task<List<Farm>> GetFarmByIdOrName(string searchTerm)

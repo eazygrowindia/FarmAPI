@@ -32,6 +32,17 @@ namespace FarmAPI.Controllers
             return existingCrop;
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<CropPartial>>> Search([FromQuery] string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2)
+                return BadRequest(new { error = "Search term must be at least 2 characters" });
+
+            var farms = await _cropService.GetPartialCropByIdOrName(searchTerm.Trim());
+
+            return Ok(farms);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCropDto newCropDto)
         {
