@@ -26,6 +26,7 @@ namespace FarmAPI
             builder.Services.AddSingleton<FarmService>();
             builder.Services.AddSingleton<MaintainerService>();
             builder.Services.AddSingleton<CropService>();
+            builder.Services.AddSingleton<ActivityService>();
 
             builder.Services.AddControllers()
                 .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);

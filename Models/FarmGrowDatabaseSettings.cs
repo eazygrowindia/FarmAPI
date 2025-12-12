@@ -10,5 +10,6 @@
         public string FarmCollectionName { get; set; } = null!;
         public string MaintainerCollectionName { get; set; } = null!;
         public string CropCollectionName { get; set; } = null!;
+        public string ActivityCollectionName { get; set; } = null!;
     }
 }
