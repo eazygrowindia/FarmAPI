@@ -25,6 +25,19 @@ namespace FarmAPI.Services
         public async Task<List<Crop>> GetAsync() =>
             await _cropCollection.Find(_ => true).ToListAsync();
 
+        public async Task<long> GetDistinctCropsCountAsync()
+        {
+            var pipeline = _cropCollection.Aggregate()
+                .Group(
+                    key => key.CropId,
+                    g => new { Id = g.Key }           // group by CropId
+                )
+                .Count();                             // count distinct groups
+
+            var result = await pipeline.FirstOrDefaultAsync();
+            return result?.Count ?? 0;
+        }
+
         public async Task<Crop?> GetAsync(string id) =>
             await _cropCollection.Find(x => x.CropId == id).FirstOrDefaultAsync();
 

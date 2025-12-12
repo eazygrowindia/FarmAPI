@@ -32,7 +32,7 @@ namespace FarmAPI.Controllers
             return activity;
         }
 
-        [HttpGet("CropId{id}")]
+        [HttpGet("CropId/{id}")]
         public async Task<ActionResult<List<Activity>>> GetByCropId(string id)
         {
             var activities = await _activityService.GetByCropIdAsync(id);

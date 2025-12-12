@@ -65,3 +65,4 @@ nunit-*.xml
 
 # Uploads folder
 Uploads
+/FarmAPI.csproj.user

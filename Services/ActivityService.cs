@@ -31,6 +31,20 @@ namespace FarmAPI.Services
         public async Task<List<Activity>?> GetByCropIdAsync(string id) =>
             await _activityCollection.Find(x => x.CropId == id).ToListAsync();
 
+        public async Task<long> GetTodayNewActivityCountAsync()
+        {
+            // Work in UTC; adjust if you need local time window
+            var today = DateTime.UtcNow.Date;          // today 00:00 UTC
+            var tomorrow = today.AddDays(1);           // next day 00:00 UTC
+
+            var builder = Builders<Activity>.Filter;
+
+            var filter = builder.Gte(a => a.CreatedAt, today) &
+                         builder.Lt(a => a.CreatedAt, tomorrow);
+
+            return await _activityCollection.CountDocumentsAsync(filter);
+        }
+
         public async Task CreateAsync(Activity newActivity) => 
             await _activityCollection.InsertOneAsync(newActivity);
 

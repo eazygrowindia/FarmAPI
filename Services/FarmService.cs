@@ -32,6 +32,19 @@ namespace FarmAPI.Services
         public async Task<Farm?> GetAsync(string id) =>
             await _farmCollection.Find(x => x.FarmId == id).FirstOrDefaultAsync();
 
+        public async Task<long> GetDistinctFarmsCountAsync()
+        {
+            var pipeline = _farmCollection.Aggregate()
+                .Group(
+                    key => key.FarmId,
+                    g => new { Id = g.Key }           // group by CropId
+                )
+                .Count();                             // count distinct groups
+
+            var result = await pipeline.FirstOrDefaultAsync();
+            return result?.Count ?? 0;
+        }
+
         public async Task<List<FarmPartial>> GetPartialFarmByIdOrName(string searchTerm)
         {
             var filter = Builders<Farm>.Filter.Or(
