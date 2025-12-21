@@ -13,6 +13,9 @@ namespace FarmAPI.Models
         [BsonElement("maintainerId")]
         public string MaintainerId { get; set; }
 
+        [BsonElement("userId")]
+        public string UserId { get; set; }  //points to the user collection
+
         /// <summary>
         /// Farm Assistant's name
         /// </summary>

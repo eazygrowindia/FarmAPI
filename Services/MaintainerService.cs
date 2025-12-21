@@ -8,17 +8,22 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Maintainer> _maintainerCollection;
 
-        public MaintainerService(
-            IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
+        //public MaintainerService(
+        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
+        //{
+        //    var mongoClient = new MongoClient(
+        //        farmGrowDatabaseSettings.Value.ConnectionString);
+
+        //    var mongoDatabase = mongoClient.GetDatabase(
+        //        farmGrowDatabaseSettings.Value.DatabaseName);
+
+        //    _maintainerCollection = mongoDatabase.GetCollection<Maintainer>(
+        //        farmGrowDatabaseSettings.Value.MaintainerCollectionName);
+        //}
+
+        public MaintainerService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            var mongoClient = new MongoClient(
-                farmGrowDatabaseSettings.Value.ConnectionString);
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                farmGrowDatabaseSettings.Value.DatabaseName);
-
-            _maintainerCollection = mongoDatabase.GetCollection<Maintainer>(
-                farmGrowDatabaseSettings.Value.MaintainerCollectionName);
+            _maintainerCollection = db.GetCollection<Maintainer>(settings.Value.MaintainerCollectionName);
         }
 
         public async Task<List<Maintainer>> GetAsync() =>
@@ -27,11 +32,19 @@ namespace FarmAPI.Services
         public async Task<Maintainer?> GetAsync(string id) =>
             await _maintainerCollection.Find(x => x.MaintainerId == id).FirstOrDefaultAsync();
 
+        public async Task<Maintainer?> GetAsyncByMobile(string mobile) =>
+            await _maintainerCollection.Find(x => x.ContactNumber.ToLower() == mobile.ToLower()).FirstOrDefaultAsync();
+
         public async Task CreateAsync(Maintainer newMaintainer) =>
             await _maintainerCollection.InsertOneAsync(newMaintainer);
 
         public async Task UpdateAsync(string id, Maintainer updatedMaintainer) =>
             await _maintainerCollection.ReplaceOneAsync(x => x.MaintainerId == id, updatedMaintainer);
+
+        public async Task UpdateAsyncByFilterUpdateDefinitions(FilterDefinition<Maintainer>? filter, UpdateDefinition<Maintainer>? update)
+        {
+            await _maintainerCollection.UpdateOneAsync(filter, update);
+        }
 
         public async Task RemoveAsync(string id) =>
             await _maintainerCollection.DeleteOneAsync(x => x.MaintainerId == id);

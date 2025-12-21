@@ -9,17 +9,22 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Crop> _cropCollection;
 
-        public CropService(
-            IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
+        //public CropService(
+        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
+        //{
+        //    var mongoClient = new MongoClient(
+        //        farmGrowDatabaseSettings.Value.ConnectionString);
+
+        //    var mongoDatabase = mongoClient.GetDatabase(
+        //        farmGrowDatabaseSettings.Value.DatabaseName);
+
+        //    _cropCollection = mongoDatabase.GetCollection<Crop>(
+        //        farmGrowDatabaseSettings.Value.CropCollectionName);
+        //}
+
+        public CropService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            var mongoClient = new MongoClient(
-                farmGrowDatabaseSettings.Value.ConnectionString);
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                farmGrowDatabaseSettings.Value.DatabaseName);
-
-            _cropCollection = mongoDatabase.GetCollection<Crop>(
-                farmGrowDatabaseSettings.Value.CropCollectionName);
+            _cropCollection = db.GetCollection<Crop>(settings.Value.CropCollectionName);
         }
 
         public async Task<List<Crop>> GetAsync() =>

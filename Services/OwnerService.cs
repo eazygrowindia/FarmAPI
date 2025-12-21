@@ -8,17 +8,22 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Owner> _ownerCollection;
 
-        public OwnerService(
-            IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
+        //public OwnerService(
+        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
+        //{
+        //    var mongoClient = new MongoClient(
+        //        farmGrowDatabaseSettings.Value.ConnectionString);
+
+        //    var mongoDatabase = mongoClient.GetDatabase(
+        //        farmGrowDatabaseSettings.Value.DatabaseName);
+
+        //    _ownerCollection = mongoDatabase.GetCollection<Owner>(
+        //        farmGrowDatabaseSettings.Value.OwnerCollectionName);
+        //}
+
+        public OwnerService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            var mongoClient = new MongoClient(
-                farmGrowDatabaseSettings.Value.ConnectionString);
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                farmGrowDatabaseSettings.Value.DatabaseName);
-
-            _ownerCollection = mongoDatabase.GetCollection<Owner>(
-                farmGrowDatabaseSettings.Value.OwnerCollectionName);
+            _ownerCollection = db.GetCollection<Owner>(settings.Value.OwnerCollectionName);
         }
 
         public async Task<List<Owner>> GetAsync() =>
@@ -30,11 +35,18 @@ namespace FarmAPI.Services
         public async Task<Owner?> GetAsyncByName(string name) =>
             await _ownerCollection.Find(x => x.OwnerName.ToLower() == name.ToLower()).FirstOrDefaultAsync();
 
+        public async Task<Owner?> GetAsyncByMobile(string mobile) =>
+            await _ownerCollection.Find(x => x.ContactNumber.ToLower() == mobile.ToLower()).FirstOrDefaultAsync();
+
         public async Task CreateAsync(Owner newOwner) =>
             await _ownerCollection.InsertOneAsync(newOwner);
 
         public async Task UpdateAsync(string id, Owner updatedOwner) =>
             await _ownerCollection.ReplaceOneAsync(x => x.OwnerId == id, updatedOwner);
+        public async Task UpdateAsyncByFilterUpdateDefinitions(FilterDefinition<Owner>? filter, UpdateDefinition<Owner>? update)
+        {
+            await _ownerCollection.UpdateOneAsync(filter, update);
+        }
 
         public async Task RemoveAsync(string id) =>
             await _ownerCollection.DeleteOneAsync(x => x.OwnerId == id);

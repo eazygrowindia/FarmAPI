@@ -5,7 +5,9 @@
         public string ConnectionString { get; set; } = null!;
 
         public string DatabaseName { get; set; } = null!;
-
+        public string UsersCollectionName { get; set; } = "";
+        public string MagicLinksCollectionName { get; set; } = "";
+        public string OtpCollectionName { get; set; } = "";
         public string OwnerCollectionName { get; set; } = null!;
         public string FarmCollectionName { get; set; } = null!;
         public string MaintainerCollectionName { get; set; } = null!;

@@ -68,7 +68,7 @@ namespace FarmAPI.Controllers
                 Crops = new List<string>()
             };
 
-            //TODO: Check based on FarmId uniqueness is not enough, as it is by default unique.
+            //REVIEW: Check based on FarmId uniqueness is not enough, as it is by default unique.
             //Check has to be done on FarmName as well to avoid duplicate farms.
             var existingFarm = await _farmService.GetAsync(newFarm.FarmId);
             if (existingFarm != null)

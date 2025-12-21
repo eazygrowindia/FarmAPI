@@ -10,20 +10,26 @@ namespace FarmAPI.Services
         private readonly IMongoCollection<Farm> _farmCollection;
         private readonly IMongoCollection<Crop> _cropCollection;
 
-        public FarmService(
-            IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
+        //public FarmService(
+        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
+        //{
+        //    var mongoClient = new MongoClient(
+        //        farmGrowDatabaseSettings.Value.ConnectionString);
+
+        //    var mongoDatabase = mongoClient.GetDatabase(
+        //        farmGrowDatabaseSettings.Value.DatabaseName);
+
+        //    _farmCollection = mongoDatabase.GetCollection<Farm>(
+        //        farmGrowDatabaseSettings.Value.FarmCollectionName);
+
+        //    _cropCollection = mongoDatabase.GetCollection<Crop>(
+        //        farmGrowDatabaseSettings.Value.CropCollectionName);
+        //}
+
+        public FarmService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            var mongoClient = new MongoClient(
-                farmGrowDatabaseSettings.Value.ConnectionString);
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                farmGrowDatabaseSettings.Value.DatabaseName);
-
-            _farmCollection = mongoDatabase.GetCollection<Farm>(
-                farmGrowDatabaseSettings.Value.FarmCollectionName);
-
-            _cropCollection = mongoDatabase.GetCollection<Crop>(
-                farmGrowDatabaseSettings.Value.CropCollectionName);
+            _farmCollection = db.GetCollection<Farm>(settings.Value.FarmCollectionName);
+            _cropCollection = db.GetCollection<Crop>(settings.Value.CropCollectionName);
         }
 
         public async Task<List<Farm>> GetAsync() =>

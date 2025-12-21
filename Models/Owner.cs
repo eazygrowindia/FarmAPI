@@ -12,6 +12,9 @@ namespace FarmAPI.Models
         [BsonElement("ownerId")]
         public string OwnerId { get; set; }
 
+        [BsonElement("userId")]
+        public string UserId { get; set; }  //points to the user collection
+
         [BsonElement("name")]
         public string OwnerName { get; set; } = null!;
 
