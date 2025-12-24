@@ -147,6 +147,10 @@ namespace FarmAPI.Controllers
                 || SystemStatusHelper.isDeactivated(user.SystemStatus))
                 return Unauthorized("Invalid credentials");
 
+            //If User is not ACTIVE then do not allow to login
+            if (!SystemStatusHelper.isActive(user.SystemStatus))
+                return Unauthorized("Invalid credentials");
+
             var ok = _passwordHasher.VerifyPassword(req.Password, user.PasswordHash, user.PasswordSalt);
             if (!ok)
                 return Unauthorized("Invalid credentials");

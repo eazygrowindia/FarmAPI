@@ -54,6 +54,7 @@ namespace FarmAPI
             builder.Services.AddScoped<MaintainerService>();
             builder.Services.AddScoped<CropService>();
             builder.Services.AddScoped<ActivityService>();
+            builder.Services.AddScoped<ObservationService>();
 
             builder.Services.AddScoped<UserRepository>();
             builder.Services.AddScoped<JwtService>();

@@ -31,7 +31,6 @@ namespace FarmAPI.Controllers
                 return BadRequest("No file uploaded.");
             }
 
-            // Generate a unique file name and path
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
             if (!Directory.Exists(uploadsFolder))
             {
@@ -39,15 +38,35 @@ namespace FarmAPI.Controllers
             }
 
             var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            string filePath = string.Empty;
+            string fullFilePath = string.Empty;
 
+            if (file.ContentType.Contains("image"))
+            {
+                filePath = Path.Combine(uploadsFolder, "images");
+                if (!Directory.Exists(filePath))
+                {
+                    Directory.CreateDirectory(filePath);
+                }
+            } 
+            else if (file.ContentType.Contains("audio"))
+            {
+                filePath = Path.Combine(uploadsFolder, "audio");
+                if (!Directory.Exists(filePath))
+                {
+                    Directory.CreateDirectory(filePath);
+                }
+            }
+
+            fullFilePath = Path.Combine(filePath, uniqueFileName);
             // Save the file to the server
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            using (var stream = new FileStream(fullFilePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            return Ok(new { fileName = uniqueFileName, fullPath = filePath });
+
+            return Ok(new { fileName = uniqueFileName, fullPath = fullFilePath });
         }
     }
 }

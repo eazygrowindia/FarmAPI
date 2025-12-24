@@ -37,6 +37,7 @@ namespace FarmAPI.Utils
         public static bool isDeactivated(string? s) => GetStatus(s) switch
         {
             SystemStatus.DEACTIVATED => true,
+            SystemStatus.UNKNOWN => true,
             _ => false
         };
 
