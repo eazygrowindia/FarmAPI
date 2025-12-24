@@ -53,7 +53,7 @@ namespace FarmAPI.Controllers
                 SurveyNumber = newFarmDto.SurveyNumber,
                 Address = newFarmDto.Address,
                 ShadeNetArea = newFarmDto.ShadeNetArea,
-                //GeoTag = newFarmDto.GeoTag,
+                GeoLocation = newFarmDto.GeoLocation,
                 FarmPondVolume = newFarmDto.FarmPondVolume,
                 IsSolarPowerAvailable = newFarmDto.IsSolarPowerAvailable,
                 MotorCapacity = newFarmDto.MotorCapacity,
@@ -65,6 +65,7 @@ namespace FarmAPI.Controllers
                 AutomationRoomSize = newFarmDto.AutomationRoomSize,
                 //FarmhouseNote = newFarmDto.FarmhouseNote,
                 StorageAreaNote = newFarmDto.StorageAreaNote,
+                WeatherData = newFarmDto.historicalWeather,
                 Crops = new List<string>()
             };
 

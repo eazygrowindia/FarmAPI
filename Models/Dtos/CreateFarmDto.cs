@@ -9,7 +9,8 @@ namespace FarmAPI.Models.Dtos
         public string SurveyNumber { get; set; } = null!;
         public string Address { get; set; } = null!;
         public double ShadeNetArea { get; set; }
-        //public LatLong GeoTag { get; set; }
+        public LatLong GeoLocation { get; set; }
+        public HistoricalWeather historicalWeather {  get; set; }
         public double FarmPondVolume { get; set; }
         public bool? IsSolarPowerAvailable { get; set; }
         public string? MotorCapacity { get; set; }

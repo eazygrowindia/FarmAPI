@@ -31,8 +31,8 @@ namespace FarmAPI.Models
         [BsonElement("shadeNetArea")]
         public double ShadeNetArea { get; set; }
 
-        [BsonElement("geoTag")]
-        public LatLong GeoTag { get; set; } = null!;
+        [BsonElement("geoLocation")]
+        public LatLong GeoLocation { get; set; } = null!;
 
         [BsonElement("weatherData")]
         public HistoricalWeather WeatherData { get; set; } = null!;
