@@ -5,8 +5,6 @@ VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmAPI", "FarmAPI.csproj", "{EFB82D84-5BF3-4DAF-82B8-A3235561EC8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmAPI.Tests", "FarmAPI.Tests\FarmAPI.Tests.csproj", "{2563F0A5-9CAA-B906-10C2-BF8FCA21FC70}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{EFB82D84-5BF3-4DAF-82B8-A3235561EC8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFB82D84-5BF3-4DAF-82B8-A3235561EC8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFB82D84-5BF3-4DAF-82B8-A3235561EC8B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2563F0A5-9CAA-B906-10C2-BF8FCA21FC70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2563F0A5-9CAA-B906-10C2-BF8FCA21FC70}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2563F0A5-9CAA-B906-10C2-BF8FCA21FC70}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2563F0A5-9CAA-B906-10C2-BF8FCA21FC70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
