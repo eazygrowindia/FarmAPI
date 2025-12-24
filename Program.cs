@@ -127,7 +127,14 @@ namespace FarmAPI
             {
                 options.AddPolicy("AllowAngularApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
+                    policy.WithOrigins("http://localhost:4200",
+                        // Server machine Angular
+                        "http://192.168.29.235:4200",
+                        // Any device on your LAN running Angular
+                        "http://192.168.29.*:4200",
+                        // Allow all 192.168.29.x subnet (dev only)
+                        "http://192.168.29.:4200"
+                        )
                           .AllowAnyMethod()
                           .AllowAnyHeader()
                           .AllowCredentials()
