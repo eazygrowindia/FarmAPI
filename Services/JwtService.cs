@@ -21,10 +21,15 @@ namespace FarmAPI.Services
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Name, user.Mobile),
+                new Claim(ClaimTypes.Actor, user.UserId.ToString()),
+                //new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.MobilePhone, user.Mobile),
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserId),
-                new Claim("mobile", user.Mobile)
+                new Claim("Mobile", user.Mobile),
+                new Claim("Actor", user.UserId.ToString()),
+                //new Claim("FarmId", user.FarmId)
+                new("Actor", user.UserId.ToString())
             };
 
             if (!string.IsNullOrEmpty(user.Email))

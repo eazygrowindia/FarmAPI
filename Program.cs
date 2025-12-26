@@ -7,6 +7,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using System.IO;
+using System.Security.Claims;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Text.Json;
 
@@ -55,6 +58,9 @@ namespace FarmAPI
             builder.Services.AddScoped<CropService>();
             builder.Services.AddScoped<ActivityService>();
             builder.Services.AddScoped<ObservationService>();
+            builder.Services.AddScoped<CropMasterService>();
+            builder.Services.AddScoped<FertilizerInventoryService>();
+            builder.Services.AddScoped<DiseaseControlInventoryService>();
 
             builder.Services.AddScoped<UserRepository>();
             builder.Services.AddScoped<JwtService>();
