@@ -163,6 +163,40 @@ namespace FarmAPI.Services
             return existingUser;
         }
 
+        public async Task<bool> UpdateMobileReferences(User existingUser, string newMobileNumber)
+        {
+            bool isUpdated = false;
+            if (existingUser.Roles.Contains(UserRoles.FARMOWNER.ToString()))
+            {
+                var matchedOwner = await _ownerService.GetAsyncByMobile(existingUser.Mobile);
+                if (matchedOwner != null)
+                {
+                    matchedOwner.ContactNumber = newMobileNumber; //update the mobile number
+                    var filter = Builders<Owner>.Filter.Eq(o => o.OwnerId, matchedOwner.OwnerId);
+                    var update = Builders<Owner>.Update.Set(o => o.ContactNumber, matchedOwner.ContactNumber);
+                    await _ownerService.UpdateAsyncByFilterUpdateDefinitions(filter, update);
+                    existingUser.Mobile = newMobileNumber;
+                    isUpdated = true;
+                }
+            }
+
+            if (existingUser.Roles.Contains(UserRoles.FARMHELP.ToString()))
+            {
+                var matchedMaintainer = await _maintainerService.GetAsyncByMobile(existingUser.Mobile);
+                if (matchedMaintainer != null)
+                {
+                    matchedMaintainer.ContactNumber = newMobileNumber; //update the mobile number
+                    var filter = Builders<Maintainer>.Filter.Eq(o => o.MaintainerId, matchedMaintainer.MaintainerId);
+                    var update = Builders<Maintainer>.Update.Set(o => o.ContactNumber, matchedMaintainer.ContactNumber);
+                    await _maintainerService.UpdateAsyncByFilterUpdateDefinitions(filter, update);
+                    existingUser.Mobile = newMobileNumber;
+                    isUpdated = true;
+                }
+            }
+
+            return isUpdated;
+        }
+
         public async Task UpdateLastLoginAsync(string userId)
         {
             var filter = Builders<User>.Filter.Eq(u => u.UserId, userId);
@@ -203,6 +237,22 @@ namespace FarmAPI.Services
                     .Set(f => f.Email, updatedUser.Email)
                     .Set(f => f.Roles, updatedUser.Roles)
                     .Set(f => f.SystemStatus, updatedUser.SystemStatus)
+                    .Set(f => f.UpdatedAt, DateTime.UtcNow)
+            );
+
+            return result;
+        }
+
+        public async Task<UpdateResult> UpdateUserProfileAsync(string userId, User updatedUser)
+        {
+            var filter = Builders<User>.Filter.Eq(x => x.UserId, userId);
+
+            var result = await _users.UpdateOneAsync(
+                filter,
+                Builders<User>.Update
+                    .Set(f => f.Name, updatedUser.Name)
+                    .Set(f => f.Email, updatedUser.Email)
+                    //.Set(f => f.Mobile, updatedUser.Mobile)
                     .Set(f => f.UpdatedAt, DateTime.UtcNow)
             );
 
