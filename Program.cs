@@ -31,6 +31,9 @@ namespace FarmAPI
             builder.Services.Configure<FarmGrowDatabaseSettings>(
                 builder.Configuration.GetSection("FarmGrowDatabase"));
 
+            builder.Services.Configure<FileStoreSettings>(
+                builder.Configuration.GetSection("FileStore"));
+
             builder.Services.AddSingleton<IMongoClient>(sp =>
             {
                 var settings = sp.GetRequiredService<IOptions<FarmGrowDatabaseSettings>>().Value;
@@ -130,18 +133,16 @@ namespace FarmAPI
                 c.EnableAnnotations();
             });
 
+            // Read origins from config
+            var allowedOrigins = builder.Configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>() ?? [];
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngularApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200",
-                        // Server machine Angular
-                        "http://192.168.29.235:4200",
-                        // Any device on your LAN running Angular
-                        "http://192.168.29.*:4200",
-                        // Allow all 192.168.29.x subnet (dev only)
-                        "http://192.168.29.:4200"
-                        )
+                    policy.WithOrigins(allowedOrigins)
                           .AllowAnyMethod()
                           .AllowAnyHeader()
                           .AllowCredentials()
@@ -163,7 +164,22 @@ namespace FarmAPI
             builder.Services.AddScoped<Fido2Service>();
             builder.Services.AddScoped<PasswordHasher>();
 
+            builder.Services.AddHsts(options =>
+            {
+                options.Preload = true;      // Allows browser preload list submission
+                options.IncludeSubDomains = true;  // Applies to all subdomains
+            });
+
             var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseHsts();
+            }
 
             app.UseSwagger();
             app.UseSwaggerUI();

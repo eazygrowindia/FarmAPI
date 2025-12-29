@@ -108,7 +108,7 @@ namespace FarmAPI.Controllers
 
             var updateResult = await _userService.UpdateAsync(userId, existingUser);
 
-            return Ok(updateResult);
+            return Ok(existingUser);
         }
 
         public record UserSystemStatusUpdateRequest(string userId, string systemStatus);

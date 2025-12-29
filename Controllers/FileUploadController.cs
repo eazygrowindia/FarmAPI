@@ -4,6 +4,7 @@ using FarmAPI.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace FarmAPI.Controllers
 {
@@ -11,12 +12,12 @@ namespace FarmAPI.Controllers
     [Route("api/[controller]")]
     public class FileUploadController : ControllerBase
     {
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly FileStoreSettings fileStoreSettings;
 
-        //public FileUploadController(IWebHostEnvironment webHostEnvironment)
-        //{
-        //    _webHostEnvironment = webHostEnvironment;
-        //}
+        public FileUploadController(IOptions<FileStoreSettings> settings)
+        {
+            fileStoreSettings = settings.Value;
+        }
 
         /// <summary>
         /// Uploads a file to the server and returns the file name and path.
@@ -31,7 +32,8 @@ namespace FarmAPI.Controllers
                 return BadRequest("No file uploaded.");
             }
 
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            var uploadsFolder = fileStoreSettings.BaseFolderPath;
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
@@ -43,7 +45,7 @@ namespace FarmAPI.Controllers
 
             if (file.ContentType.Contains("image"))
             {
-                filePath = Path.Combine(uploadsFolder, "images");
+                filePath = Path.Combine(uploadsFolder, fileStoreSettings.ImagesFolderName);
                 if (!Directory.Exists(filePath))
                 {
                     Directory.CreateDirectory(filePath);
@@ -51,7 +53,7 @@ namespace FarmAPI.Controllers
             } 
             else if (file.ContentType.Contains("audio"))
             {
-                filePath = Path.Combine(uploadsFolder, "audio");
+                filePath = Path.Combine(uploadsFolder, fileStoreSettings.AudioFolderName);
                 if (!Directory.Exists(filePath))
                 {
                     Directory.CreateDirectory(filePath);

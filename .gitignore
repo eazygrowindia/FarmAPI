@@ -66,3 +66,5 @@ nunit-*.xml
 # Uploads folder
 Uploads
 /FarmAPI.csproj.user
+/Properties/PublishProfiles
+/.config/dotnet-tools.json
