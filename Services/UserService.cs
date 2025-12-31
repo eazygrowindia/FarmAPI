@@ -158,7 +158,11 @@ namespace FarmAPI.Services
                 updateUserDto.Roles.Remove(UserRoles.FARMHELP.ToString());
             }
 
-            existingUser.Roles = updateUserDto.Roles;
+            if(updateUserDto.Roles.Any())
+                existingUser.Roles = updateUserDto.Roles;
+
+            if (!existingUser.Roles.Any())
+                existingUser.Roles.Add(UserRoles.UNKNOWN.ToString());
 
             return existingUser;
         }
