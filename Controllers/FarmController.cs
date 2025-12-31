@@ -3,6 +3,7 @@ using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FarmAPI.Controllers
 {
@@ -35,10 +36,47 @@ namespace FarmAPI.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<FarmPartial>>> Search([FromQuery] string searchTerm)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2)
+            if (string.IsNullOrEmpty(searchTerm.Trim()) || searchTerm.Length < 2)
                 return BadRequest(new { error = "Search term must be at least 2 characters" });
 
-            var farms = await _farmService.GetPartialFarmByIdOrName(searchTerm.Trim());
+            //var farms = await _farmService.GetPartialFarmByIdOrName(searchTerm.Trim());
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var isFarmOwner = User.IsInRole(UserRoles.FARMOWNER.ToString());
+            var isFarmHelp = User.IsInRole(UserRoles.FARMHELP.ToString());
+
+            var roles = User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+
+            var farms = await _farmService.GetPartialFarmByIdOrNameOnUser(userId, roles, searchTerm);
+
+
+            return Ok(farms);
+        }
+
+        [HttpGet("GetAllFarmCropByUser")]
+        public async Task<ActionResult<IEnumerable<FarmPartial>>> Search()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var isFarmOwner = User.IsInRole(UserRoles.FARMOWNER.ToString());
+            var isFarmHelp = User.IsInRole(UserRoles.FARMHELP.ToString());
+
+            var roles = User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+
+            var farms = await _farmService.GetPartialFarmByUser(userId, roles);
 
             return Ok(farms);
         }

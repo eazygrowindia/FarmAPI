@@ -1,4 +1,5 @@
 ﻿using FarmAPI.Models;
+using FarmAPI.Utils;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -9,6 +10,8 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Farm> _farmCollection;
         private readonly IMongoCollection<Crop> _cropCollection;
+        private readonly IMongoCollection<Owner> _ownerCollection;
+        private readonly IMongoCollection<Maintainer> _maintainerCollection;
 
         //public FarmService(
         //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
@@ -30,6 +33,8 @@ namespace FarmAPI.Services
         {
             _farmCollection = db.GetCollection<Farm>(settings.Value.FarmCollectionName);
             _cropCollection = db.GetCollection<Crop>(settings.Value.CropCollectionName);
+            _ownerCollection = db.GetCollection<Owner>(settings.Value.OwnerCollectionName);
+            _maintainerCollection = db.GetCollection<Maintainer>(settings.Value.MaintainerCollectionName);
         }
 
         public async Task<List<Farm>> GetAsync() =>
@@ -51,23 +56,123 @@ namespace FarmAPI.Services
             return result?.Count ?? 0;
         }
 
-        public async Task<List<FarmPartial>> GetPartialFarmByIdOrName(string searchTerm)
+        public async Task<List<FarmPartial>> GetPartialFarmByIdOrNameOnUser(string userId, List<string> roles, string searchTerm)
         {
-            var filter = Builders<Farm>.Filter.Or(
+            List<FarmPartial> farmCollection = new List<FarmPartial>();
+            var projection = Builders<Farm>.Projection.Include(f => f.FarmId)
+                                           .Include(f => f.FarmName)
+                                           .Include(f => f.Crops)
+                                           .Exclude("_id");
+            var searchfilter = Builders<Farm>.Filter.Or(
                 Builders<Farm>.Filter.Regex(x => x.FarmId, new BsonRegularExpression(searchTerm, "i")),
                 Builders<Farm>.Filter.Regex(x => x.FarmName, new BsonRegularExpression(searchTerm, "i"))
             );
 
-            var projection = Builders<Farm>.Projection.Include(f => f.FarmId)
-                                           .Include(f => f.FarmName)
-                                           .Include(f => f.Crops)
-                                           .Exclude("_id"); // Optional to exclude 
+            if (UserRolesHelper.HasRole(roles, UserRoles.FARMOWNER))
+            {
+                //get all farms from owner collection
+                List<string> farms = new List<string>();
+                var owner = await _ownerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
+                if (owner != null)
+                {
+                    farms = owner.FarmsOwned;
+                }
+                var farmIdfilter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
+                var filter = farmIdfilter & searchfilter;
+                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+            }
+
+            if (UserRolesHelper.HasRole(roles, UserRoles.FARMHELP))
+            {
+                //get all farms from maintainer collection
+                List<string> farms = new List<string>();
+                var owner = await _maintainerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
+                if (owner != null)
+                {
+                    farms = owner.FarmsMaintained;
+                }
+                var farmIdfilter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
+                var filter = farmIdfilter & searchfilter;
+                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+            }
+
+            if (UserRolesHelper.HasRole(roles, UserRoles.EASYGROWADMIN))
+            {
+                //get all farms from farm collection
+                var farmIdfilter = Builders<Farm>.Filter.Empty;
+                var filter = farmIdfilter & searchfilter;
+                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+            }
+
 
             var cropProjection = Builders<Crop>.Projection.Include(f => f.CropId)
                                            .Include(f => f.CropName)
                                            .Exclude("_id");
 
-            var farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+            foreach (var farm in farmCollection)
+            {
+                var cropDetails = new List<CropPartial>();
+                if (farm.Crops != null && farm.Crops.Count > 0)
+                {
+                    foreach (var cropId in farm.Crops)
+                    {
+                        var crop = await _cropCollection.Find(c => c.CropId == cropId).Project<CropPartial>(cropProjection).FirstOrDefaultAsync();
+                        if (crop != null)
+                        {
+                            cropDetails.Add(crop);
+                        }
+                    }
+                }
+                farm.CropDetail = cropDetails;
+            }
+
+            return farmCollection;
+        }
+
+        public async Task<List<FarmPartial>> GetPartialFarmByUser(string userId, List<string> roles)
+        {
+            List<FarmPartial> farmCollection = new List<FarmPartial>();
+            var projection = Builders<Farm>.Projection.Include(f => f.FarmId)
+                                           .Include(f => f.FarmName)
+                                           .Include(f => f.Crops)
+                                           .Exclude("_id");
+
+            if (UserRolesHelper.HasRole(roles, UserRoles.FARMOWNER))
+            {
+                //get all farms from owner collection
+                List<string> farms = new List<string>();
+                var owner = await _ownerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
+                if(owner != null)
+                {
+                    farms = owner.FarmsOwned;
+                }
+                var filter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
+                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+            }
+
+            if (UserRolesHelper.HasRole(roles, UserRoles.FARMHELP))
+            {
+                //get all farms from maintainer collection
+                List<string> farms = new List<string>();
+                var owner = await _maintainerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
+                if (owner != null)
+                {
+                    farms = owner.FarmsMaintained;
+                }
+                var filter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
+                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+            }
+
+            if (UserRolesHelper.HasRole(roles, UserRoles.EASYGROWADMIN))
+            {
+                //get all farms from farm collection
+                farmCollection = await _farmCollection.Find(_ => true).Project<FarmPartial>(projection).ToListAsync();
+            }
+
+
+            var cropProjection = Builders<Crop>.Projection.Include(f => f.CropId)
+                                           .Include(f => f.CropName)
+                                           .Exclude("_id");
 
             foreach (var farm in farmCollection)
             {
