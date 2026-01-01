@@ -84,27 +84,27 @@ namespace FarmAPI.Controllers
             {
                 return NotFound();
             }
+            
+            if (existingUser.Mobile != updatedUserDto.Mobile)
+            {
+                //check if mobile is used by another user
+                var isNewMobileNumberAlreadyInUse = await _userService.IsMobileAlreadyInUse(existingUser.UserId, updatedUserDto.Mobile);
+                if (isNewMobileNumberAlreadyInUse)
+                {
+                    return Conflict(new { message = "Mobile number is already in use by another user." });
+                }
+            }
 
             existingUser.Email = updatedUserDto.Email;
             existingUser.Name = updatedUserDto.Name;
-            //existingUser.SystemStatus = SystemStatusHelper.GetStatus(updatedUserDto.SystemStatus).ToString();
 
-            //check roles
-            //check if mobile matches owner/helper - then dont remove role, else remove
             await _userService.UpdateUserRolesAsync(updatedUserDto, existingUser);
 
-            //TODO - update mobile number
-            //check if existing mobile number equals newmobile number
-            //if equal, then no change
-            //if different
-            //then
-            //  check if user is an owner/helper
-            //  if not either then no change
-            //  if any of (owner/helper)
-            //      then
-            //          check if mobile number should be updated on owner/helper data as well or not
-            //  update user mobile
-
+            //REVIEW: needs atomicity/transactional processing here, as multiple collections are updated
+            if (existingUser.Mobile != updatedUserDto.Mobile)
+            {
+                await _userService.UpdateMobileReferences(existingUser, updatedUserDto.Mobile);
+            }
 
             var updateResult = await _userService.UpdateAsync(userId, existingUser);
 

@@ -52,11 +52,14 @@ namespace FarmAPI.Controllers
             if (user == null)
                 return NotFound();
 
-            //check if mobile is used by another user
-            var result = await userService.GetByMobileAsync(dto.Mobile);
-            if (result != null && result.UserId != user.UserId)
+            if (user.Mobile != dto.Mobile)
             {
-                return Conflict(new { message = "Mobile number is already in use by another user." });
+                //check if mobile is used by another user
+                var isNewMobileNumberAlreadyInUse = await userService.IsMobileAlreadyInUse(user.UserId, dto.Mobile);
+                if (isNewMobileNumberAlreadyInUse)
+                {
+                    return Conflict(new { message = "Mobile number is already in use by another user." });
+                }
             }
 
             user.Name = dto.Name;

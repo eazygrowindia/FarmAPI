@@ -50,6 +50,46 @@ namespace FarmAPI.Services
         }
 
         /// <summary>
+        /// Check if another user in user collection has the same mobile number
+        /// Check on non user referenced owner & maintainer collections
+        /// i.e non-existent user collection document for owner & maintainer documents
+        /// 
+        /// </summary>
+        /// <param name="existingUserId"></param>
+        /// <param name="newMobileNumber"></param>
+        /// <returns></returns>
+        public async Task<bool> IsMobileAlreadyInUse(string existingUserId, string newMobileNumber)
+        {
+            bool isInUse = false;
+            var otherUser = await GetByMobileAsync(newMobileNumber);
+            if (otherUser != null && otherUser.UserId != existingUserId)
+            {
+                //other user exists, conflict
+                isInUse = true;
+            }
+            else
+            {
+                var otherOwner = await _ownerService.GetAsyncByMobile(newMobileNumber);
+                if (otherOwner != null 
+                    && (!string.IsNullOrEmpty(otherOwner.UserId) ? otherOwner.UserId != existingUserId : true))
+                {
+                    //other owner exists, conflict
+                    isInUse = true;
+                }
+
+                var otherMaintainer = await _maintainerService.GetAsyncByMobile(newMobileNumber);
+                if (otherMaintainer != null
+                    && (!string.IsNullOrEmpty(otherMaintainer.UserId) ? otherMaintainer.UserId != existingUserId : true))
+                {
+                    //other owner exists, conflict
+                    isInUse = true;
+                }
+            }
+
+            return isInUse;
+        }
+
+        /// <summary>
         /// Used by Register functionality to create a user
         /// </summary>
         /// <param name="mobile"></param>
