@@ -7,10 +7,8 @@ namespace FarmAPI.Models
     public class CreateDiseaseControlInventoryDto
     {
         public required string FarmId { get; set; }
-        public required string FertilizerName { get; set; }
+        public required string DiseaseControlName { get; set; }
         public double QuantitySupplied { get; set; }
-        public DateOnly SuppliedDate { get; set; }
-        public double QuantityUsed { get; set; }
-        public DateOnly UsedDate { get; set; }
+        public DateTime SuppliedDate { get; set; }
     }
 }

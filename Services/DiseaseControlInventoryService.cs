@@ -17,11 +17,17 @@ namespace FarmAPI.Services
         public async Task<List<DiseaseControlInventory>> GetAsync() =>
             await _diseaseControlInventoryCollection.Find(_ => true).ToListAsync();
 
+        public async Task<List<DiseaseControlInventory>> GetAllFarmInventoryAsync(string farmId) =>
+            await _diseaseControlInventoryCollection.Find(i => i.FarmId == farmId).ToListAsync();
+
         public async Task<DiseaseControlInventory?> GetByIdAsync(string id) =>
             await _diseaseControlInventoryCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
         public async Task<DiseaseControlInventory?> GetByInventoryIdAsync(string inventoryId) =>
             await _diseaseControlInventoryCollection.Find(x => x.InventoryId == inventoryId).FirstOrDefaultAsync();
+
+        public async Task<DiseaseControlInventory?> GetByFarmIdDiseaseControlNameAsync(string farmId, string diseaseControlName) =>
+            await _diseaseControlInventoryCollection.Find(x => x.FarmId == farmId && x.DiseaseControlName == diseaseControlName).FirstOrDefaultAsync();
 
         public async Task CreateAsync(DiseaseControlInventory newFertilizerInventory) => 
             await _diseaseControlInventoryCollection.InsertOneAsync(newFertilizerInventory);

@@ -23,6 +23,9 @@ namespace FarmAPI.Services
         public async Task<CropMaster?> GetByCropIdAsync(string cropId) =>
             await _cropMasterCollection.Find(x => x.CropId == cropId).FirstOrDefaultAsync();
 
+        public async Task<CropMaster?> GetByCropNameAsync(string cropName) =>
+            await _cropMasterCollection.Find(x => x.CropName == cropName).FirstOrDefaultAsync();
+
         public async Task CreateAsync(CropMaster newCropMaster) => 
             await _cropMasterCollection.InsertOneAsync(newCropMaster);
 

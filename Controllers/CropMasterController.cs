@@ -13,8 +13,8 @@ namespace FarmAPI.Controllers
     {
         private readonly CropMasterService _cropMasterService;
 
-        public CropMasterController(CropMasterService observationService) =>
-            _cropMasterService = observationService;
+        public CropMasterController(CropMasterService cropMasterService) =>
+            _cropMasterService = cropMasterService;
 
         [HttpGet("GetAll")]
         public async Task<List<CropMaster>> Get() =>
@@ -72,13 +72,14 @@ namespace FarmAPI.Controllers
                 UpdatedBy = actor
             };
 
-            var existingCropMaster = await _cropMasterService.GetByCropIdAsync(newCropMaster.CropId);
-            if (existingCropMaster != null)
+            var existingCropMasterById = await _cropMasterService.GetByCropIdAsync(newCropMaster.CropId);
+            var existingCropMasterByName = await _cropMasterService.GetByCropNameAsync(newCropMaster.CropName);
+            if (existingCropMasterById != null || existingCropMasterByName != null)
             {
                 var problem = new ProblemDetails
                 {
                     Title = "Item already exists",
-                    Detail = $"An cropMaster with CropId '{newCropMaster.CropId}' already exists.",
+                    Detail = $"An cropMaster with CropId or cropName already exists.",
                     Status = StatusCodes.Status400BadRequest,
                     Instance = HttpContext.Request.Path                 
                 };

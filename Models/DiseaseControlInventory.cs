@@ -23,13 +23,13 @@ namespace FarmAPI.Models
         public double QuantitySupplied { get; set; }
 
         [BsonElement("suppliedDate")]
-        public DateOnly SuppliedDate { get; set; }
+        public DateTime SuppliedDate { get; set; }
 
         [BsonElement("quantityUsed")]
         public double QuantityUsed { get; set; }
 
         [BsonElement("usedDate")]
-        public DateOnly UsedDate { get; set; }
+        public DateTime UsedDate { get; set; }
 
         /// <summary>
         /// References UserId from user collection
