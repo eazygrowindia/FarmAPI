@@ -16,6 +16,12 @@ namespace FarmAPI.Models
         [BsonElement("cropId")]
         public required string CropId { get; set; }
 
+        [BsonElement("farmId")]
+        public required string FarmId { get; set; }
+
+        [BsonElement("cropMasterId")]
+        public required string CropMasterId { get; set; }
+
         //[BsonElement("farmId")]
         //public required string FarmId { get; set; }
 

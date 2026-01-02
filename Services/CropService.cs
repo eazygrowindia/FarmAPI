@@ -9,19 +9,6 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Crop> _cropCollection;
 
-        //public CropService(
-        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
-        //{
-        //    var mongoClient = new MongoClient(
-        //        farmGrowDatabaseSettings.Value.ConnectionString);
-
-        //    var mongoDatabase = mongoClient.GetDatabase(
-        //        farmGrowDatabaseSettings.Value.DatabaseName);
-
-        //    _cropCollection = mongoDatabase.GetCollection<Crop>(
-        //        farmGrowDatabaseSettings.Value.CropCollectionName);
-        //}
-
         public CropService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
         {
             _cropCollection = db.GetCollection<Crop>(settings.Value.CropCollectionName);
@@ -43,8 +30,11 @@ namespace FarmAPI.Services
             return result?.Count ?? 0;
         }
 
-        public async Task<Crop?> GetAsync(string id) =>
-            await _cropCollection.Find(x => x.CropId == id).FirstOrDefaultAsync();
+        public async Task<Crop?> GetByCropIdAsync(string cropId) =>
+            await _cropCollection.Find(x => x.CropId == cropId).FirstOrDefaultAsync();
+
+        public async Task<Crop?> GetByFarmAndCropMasterAsync(string farmId, string cropMasterId) =>
+            await _cropCollection.Find(x => x.FarmId == farmId && x.CropMasterId == cropMasterId).FirstOrDefaultAsync();
 
         public async Task<List<CropPartial>> GetPartialCropByIdOrName(string searchTerm)
         {

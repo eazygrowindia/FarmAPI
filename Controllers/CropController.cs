@@ -11,18 +11,22 @@ namespace FarmAPI.Controllers
     public class CropController : ControllerBase
     {
         private readonly CropService _cropService;
+        private readonly CropMasterService _cropMasterService;
 
-        public CropController(CropService cropService) =>
+        public CropController(CropService cropService, CropMasterService cropMasterService)
+        {
             _cropService = cropService;
+            _cropMasterService = cropMasterService;
+        }
 
         [HttpGet]
         public async Task<List<Crop>> Get() =>
             await _cropService.GetAsync();
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Crop>> Get(string id)
+        [HttpGet("{cropId}")]
+        public async Task<ActionResult<Crop>> Get(string cropId)
         {
-            var existingCrop = await _cropService.GetAsync(id);
+            var existingCrop = await _cropService.GetByCropIdAsync(cropId);
 
             if (existingCrop is null)
             {
@@ -54,13 +58,14 @@ namespace FarmAPI.Controllers
             {
                 CropName = newCropDto.CropName,
                 CropId = newCropDto.CropId,
+                FarmId = newCropDto.FarmId,
+                CropMasterId = newCropDto.CropMasterId,
                 CropArea = newCropDto.CropArea,
                 DateOfSowing = newCropDto.DateOfSowing
             };
 
-            //TODO: Check based on CropId uniqueness is not enough, as it is by default unique.
             //Check has to be done on CropName as well to avoid duplicate crops.
-            var existingCrop = await _cropService.GetAsync(newCrop.CropId);
+            var existingCrop = await _cropService.GetByCropIdAsync(newCrop.CropId);
             if (existingCrop != null)
             {
                 var problem = new ProblemDetails
@@ -73,23 +78,47 @@ namespace FarmAPI.Controllers
                 return BadRequest(problem);
             }
 
-            //TODO : Business logic to calculate ProbableHarvestDate based on Crop type can be added here.
-            newCrop.ProbableHarvestDate = newCropDto.DateOfSowing.AddMonths(6);
-            newCrop.ExpectedYield = 25;
+            //Check based on farmId has to be included so that no two crops of a farm can have same master crop Ids
+            var existingCropWithCropMaster = await _cropService.GetByFarmAndCropMasterAsync(newCrop.FarmId, newCrop.CropMasterId);
+            if (existingCrop != null)
+            {
+                var problem = new ProblemDetails
+                {
+                    Title = "Item already exists",
+                    Detail = $"A crop with CropId '{newCrop.CropId}' already exists.",
+                    Status = StatusCodes.Status400BadRequest,
+                    Instance = HttpContext.Request.Path
+                };
+                return BadRequest(problem);
+            }
+
+            //Business logic to calculate ProbableHarvestDate based on Crop type
+            var cropMasterData = await _cropMasterService.GetByCropIdAsync(newCrop.CropMasterId);
+            if (cropMasterData != null)
+            {
+                newCrop.ProbableHarvestDate = newCropDto.DateOfSowing.AddDays(cropMasterData.Duration);
+                newCrop.ExpectedYield = newCropDto.CropArea * cropMasterData.ExpectedYield;
+            }
+            else
+            {
+                // Default logic if CropMaster data is not found
+                newCrop.ProbableHarvestDate = DateTime.MinValue;
+                newCrop.ExpectedYield = 0;
+            }
 
             await _cropService.CreateAsync(newCrop);
             return CreatedAtAction(nameof(Get), new { id = newCrop.Id }, newCrop);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateCropDto updatedCropDto)
+        [HttpPut("{cropId}")]
+        public async Task<IActionResult> Update(string cropId, [FromBody] UpdateCropDto updatedCropDto)
         {
             // dto.CropName is guaranteed non-null/empty here
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);  // Returns 400 with errors
 
             // Use route id; ignore any Id/CropId in body
-            var existingCrop = await _cropService.GetAsync(id);
+            var existingCrop = await _cropService.GetByCropIdAsync(cropId);
             if (existingCrop == null) return NotFound();
 
             existingCrop.CropName = updatedCropDto.CropName;
@@ -102,22 +131,22 @@ namespace FarmAPI.Controllers
 
             existingCrop.ExpectedYield = 25;
 
-            await _cropService.UpdateAsync(id, existingCrop);
+            await _cropService.UpdateAsync(cropId, existingCrop);
             return NoContent();
         }
 
         //[HttpDelete("{id:length(24)}")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpDelete("{cropId}")]
+        public async Task<IActionResult> Delete(string cropId)
         {
-            var existingCrop = await _cropService.GetAsync(id);
+            var existingCrop = await _cropService.GetByCropIdAsync(cropId);
 
             if (existingCrop is null)
             {
                 return NotFound();
             }
 
-            await _cropService.RemoveAsync(id);
+            await _cropService.RemoveAsync(cropId);
 
             return NoContent();
         }
