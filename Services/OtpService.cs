@@ -11,9 +11,9 @@ namespace FarmAPI.Services
         private readonly IMongoCollection<OtpSession> _otps;
         private readonly UserRepository _users;
 
-        public OtpService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings, UserRepository users)
+        public OtpService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings, UserRepository users)
         {
-            _otps = db.GetCollection<OtpSession>(farmGrowDatabaseSettings.Value.OtpCollectionName);
+            _otps = db.FarmGrow.GetCollection<OtpSession>(farmGrowDatabaseSettings.Value.OtpCollectionName);
             _users = users;
         }
 

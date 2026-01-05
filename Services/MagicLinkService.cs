@@ -9,9 +9,9 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<MagicLink> _magicLinks;
 
-        public MagicLinkRepository(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public MagicLinkRepository(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _magicLinks = db.GetCollection<MagicLink>(settings.Value.MagicLinksCollectionName);
+            _magicLinks = db.FarmGrow.GetCollection<MagicLink>(settings.Value.MagicLinksCollectionName);
         }
 
         public async Task<MagicLink> CreateAsync(string userId, string token, DateTime expiresAt)

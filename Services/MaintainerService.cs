@@ -8,22 +8,9 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Maintainer> _maintainerCollection;
 
-        //public MaintainerService(
-        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
-        //{
-        //    var mongoClient = new MongoClient(
-        //        farmGrowDatabaseSettings.Value.ConnectionString);
-
-        //    var mongoDatabase = mongoClient.GetDatabase(
-        //        farmGrowDatabaseSettings.Value.DatabaseName);
-
-        //    _maintainerCollection = mongoDatabase.GetCollection<Maintainer>(
-        //        farmGrowDatabaseSettings.Value.MaintainerCollectionName);
-        //}
-
-        public MaintainerService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public MaintainerService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _maintainerCollection = db.GetCollection<Maintainer>(settings.Value.MaintainerCollectionName);
+            _maintainerCollection = db.FarmGrow.GetCollection<Maintainer>(settings.Value.MaintainerCollectionName);
         }
 
         public async Task<List<Maintainer>> GetAsync() =>

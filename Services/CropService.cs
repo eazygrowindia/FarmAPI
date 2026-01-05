@@ -9,9 +9,9 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Crop> _cropCollection;
 
-        public CropService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public CropService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _cropCollection = db.GetCollection<Crop>(settings.Value.CropCollectionName);
+            _cropCollection = db.FarmGrow.GetCollection<Crop>(settings.Value.CropCollectionName);
         }
 
         public async Task<List<Crop>> GetAsync() =>

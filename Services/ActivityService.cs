@@ -9,22 +9,9 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Activity> _activityCollection;
 
-        //public ActivityService(
-        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
-        //{
-        //    var mongoClient = new MongoClient(
-        //        farmGrowDatabaseSettings.Value.ConnectionString);
-
-        //    var mongoDatabase = mongoClient.GetDatabase(
-        //        farmGrowDatabaseSettings.Value.DatabaseName);
-
-        //    _activityCollection = mongoDatabase.GetCollection<Activity>(
-        //        farmGrowDatabaseSettings.Value.ActivityCollectionName);
-        //}
-
-        public ActivityService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public ActivityService(IDatabaseFactory dbFactory, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _activityCollection = db.GetCollection<Activity>(settings.Value.ActivityCollectionName);
+            _activityCollection = dbFactory.FarmGrow.GetCollection<Activity>(settings.Value.ActivityCollectionName);
         }
 
         public async Task<List<Activity>> GetAsync() =>

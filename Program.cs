@@ -2,6 +2,7 @@
 using FarmAPI.Models;
 using FarmAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -22,12 +23,6 @@ namespace FarmAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            //builder.Services.Configure<FarmGrowDatabaseSettings>(
-            //    builder.Configuration.GetSection("FarmGrowDatabase"));
-
-
-            // Program.cs (add before registering repositories)
             builder.Services.Configure<FarmGrowDatabaseSettings>(
                 builder.Configuration.GetSection("FarmGrowDatabase"));
 
@@ -40,17 +35,11 @@ namespace FarmAPI
                 return new MongoClient(settings.ConnectionString);
             });
 
-            //builder.Services.AddSingleton<IMongoDatabase>(sp =>
-            //{
-            //    var settings = sp.GetRequiredService<IOptions<FarmGrowDatabaseSettings>>().Value;
-            //    return sp.GetRequiredService<IMongoClient>().GetDatabase(settings.DatabaseName);
-            //});
-
-            builder.Services.AddScoped(sp =>
+            builder.Services.AddKeyedScoped<IMongoDatabase>("FarmGrowDB", (sp, key) =>
             {
-                var mongoSettings = sp.GetRequiredService<IOptions<FarmGrowDatabaseSettings>>().Value;
-                var client = sp.GetRequiredService<IMongoClient>();
-                return client.GetDatabase(mongoSettings.DatabaseName);
+                var settings = sp.GetRequiredService<IOptions<FarmGrowDatabaseSettings>>().Value;
+                var client = sp.GetServices<IMongoClient>().First();  // FarmGrow client
+                return client.GetDatabase(settings.DatabaseName);
             });
 
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
@@ -69,6 +58,35 @@ namespace FarmAPI
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<MagicLinkRepository>();
             builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+            builder.Services.Configure<AddressLoaderDatabaseSettings>(
+                builder.Configuration.GetSection("AddressLoaderDatabase"));
+
+            builder.Services.AddSingleton<IMongoClient>(sp =>
+            {
+                var settings = sp.GetRequiredService<IOptions<AddressLoaderDatabaseSettings>>().Value;
+                var clientSettings = MongoClientSettings.FromConnectionString(settings.ConnectionString);
+
+                // LGD import speed boosters
+                clientSettings.MaxConnectionPoolSize = 200;        // More concurrent batches
+                clientSettings.MaxConnectionIdleTime = TimeSpan.FromMinutes(10);
+                clientSettings.MaxConnectionLifeTime = TimeSpan.FromHours(1);
+                clientSettings.WriteConcern = new WriteConcern(1, journal: false);  // Skip journal sync
+
+                return new MongoClient(clientSettings);
+            });
+
+            builder.Services.AddKeyedScoped<IMongoDatabase>("AddressLoaderDB", (sp, key) =>
+            {
+                var settings = sp.GetRequiredService<IOptions<AddressLoaderDatabaseSettings>>().Value;
+                var client = sp.GetServices<IMongoClient>().Last();  // LGD optimized client
+                return client.GetDatabase(settings.DatabaseName);
+            });
+
+            builder.Services.AddScoped<IDatabaseFactory, DatabaseFactory>();
+
+            builder.Services.AddScoped<LgdLocationService>();
+            builder.Services.AddScoped<LgdImportService>();
 
             var jwt = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
             var key = Encoding.UTF8.GetBytes(jwt.Key);

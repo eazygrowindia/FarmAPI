@@ -9,9 +9,9 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<Observation> _observationCollection;
 
-        public ObservationService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public ObservationService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _observationCollection = db.GetCollection<Observation>(settings.Value.ObservationCollectionName);
+            _observationCollection = db.FarmGrow.GetCollection<Observation>(settings.Value.ObservationCollectionName);
         }
 
         public async Task<List<Observation>> GetAsync() =>

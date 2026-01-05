@@ -13,9 +13,9 @@ namespace FarmAPI.Services
         private OwnerService _ownerService;
         private MaintainerService _maintainerService;
 
-        public UserRepository(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings, OwnerService ownerService, MaintainerService maintainerService)
+        public UserRepository(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings, OwnerService ownerService, MaintainerService maintainerService)
         {
-            _users = db.GetCollection<User>(settings.Value.UsersCollectionName);
+            _users = db.FarmGrow.GetCollection<User>(settings.Value.UsersCollectionName);
             _ownerService = ownerService;
             _maintainerService = maintainerService;
         }

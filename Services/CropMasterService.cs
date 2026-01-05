@@ -9,9 +9,9 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<CropMaster> _cropMasterCollection;
 
-        public CropMasterService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public CropMasterService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _cropMasterCollection = db.GetCollection<CropMaster>(settings.Value.CropMasterCollectionName);
+            _cropMasterCollection = db.FarmGrow.GetCollection<CropMaster>(settings.Value.CropMasterCollectionName);
         }
 
         public async Task<List<CropMaster>> GetAsync() =>

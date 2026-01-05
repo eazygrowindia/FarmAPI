@@ -7,23 +7,9 @@ namespace FarmAPI.Services
     public class OwnerService
     {
         private readonly IMongoCollection<Owner> _ownerCollection;
-
-        //public OwnerService(
-        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
-        //{
-        //    var mongoClient = new MongoClient(
-        //        farmGrowDatabaseSettings.Value.ConnectionString);
-
-        //    var mongoDatabase = mongoClient.GetDatabase(
-        //        farmGrowDatabaseSettings.Value.DatabaseName);
-
-        //    _ownerCollection = mongoDatabase.GetCollection<Owner>(
-        //        farmGrowDatabaseSettings.Value.OwnerCollectionName);
-        //}
-
-        public OwnerService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public OwnerService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _ownerCollection = db.GetCollection<Owner>(settings.Value.OwnerCollectionName);
+            _ownerCollection = db.FarmGrow.GetCollection<Owner>(settings.Value.OwnerCollectionName);
         }
 
         public async Task<List<Owner>> GetAsync() =>

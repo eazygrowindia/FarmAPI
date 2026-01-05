@@ -9,9 +9,9 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<DiseaseControlInventory> _diseaseControlInventoryCollection;
 
-        public DiseaseControlInventoryService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public DiseaseControlInventoryService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _diseaseControlInventoryCollection = db.GetCollection<DiseaseControlInventory>(settings.Value.DiseaseControlInventoryCollectionName);
+            _diseaseControlInventoryCollection = db.FarmGrow.GetCollection<DiseaseControlInventory>(settings.Value.DiseaseControlInventoryCollectionName);
         }
 
         public async Task<List<DiseaseControlInventory>> GetAsync() =>

@@ -9,9 +9,9 @@ namespace FarmAPI.Services
     {
         private readonly IMongoCollection<FertilizerInventory> _fertilizerInventoryCollection;
 
-        public FertilizerInventoryService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public FertilizerInventoryService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _fertilizerInventoryCollection = db.GetCollection<FertilizerInventory>(settings.Value.FertilizerInventoryCollectionName);
+            _fertilizerInventoryCollection = db.FarmGrow.GetCollection<FertilizerInventory>(settings.Value.FertilizerInventoryCollectionName);
         }
 
         public async Task<List<FertilizerInventory>> GetAsync() =>

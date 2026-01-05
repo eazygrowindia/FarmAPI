@@ -13,28 +13,12 @@ namespace FarmAPI.Services
         private readonly IMongoCollection<Owner> _ownerCollection;
         private readonly IMongoCollection<Maintainer> _maintainerCollection;
 
-        //public FarmService(
-        //    IOptions<FarmGrowDatabaseSettings> farmGrowDatabaseSettings)
-        //{
-        //    var mongoClient = new MongoClient(
-        //        farmGrowDatabaseSettings.Value.ConnectionString);
-
-        //    var mongoDatabase = mongoClient.GetDatabase(
-        //        farmGrowDatabaseSettings.Value.DatabaseName);
-
-        //    _farmCollection = mongoDatabase.GetCollection<Farm>(
-        //        farmGrowDatabaseSettings.Value.FarmCollectionName);
-
-        //    _cropCollection = mongoDatabase.GetCollection<Crop>(
-        //        farmGrowDatabaseSettings.Value.CropCollectionName);
-        //}
-
-        public FarmService(IMongoDatabase db, IOptions<FarmGrowDatabaseSettings> settings)
+        public FarmService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
-            _farmCollection = db.GetCollection<Farm>(settings.Value.FarmCollectionName);
-            _cropCollection = db.GetCollection<Crop>(settings.Value.CropCollectionName);
-            _ownerCollection = db.GetCollection<Owner>(settings.Value.OwnerCollectionName);
-            _maintainerCollection = db.GetCollection<Maintainer>(settings.Value.MaintainerCollectionName);
+            _farmCollection = db.FarmGrow.GetCollection<Farm>(settings.Value.FarmCollectionName);
+            _cropCollection = db.FarmGrow.GetCollection<Crop>(settings.Value.CropCollectionName);
+            _ownerCollection = db.FarmGrow.GetCollection<Owner>(settings.Value.OwnerCollectionName);
+            _maintainerCollection = db.FarmGrow.GetCollection<Maintainer>(settings.Value.MaintainerCollectionName);
         }
 
         public async Task<List<Farm>> GetAsync() =>
