@@ -1,6 +1,7 @@
 ﻿using FarmAPI.Models;
 using FarmAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 namespace FarmAPI.Controllers
 {
@@ -9,10 +10,12 @@ namespace FarmAPI.Controllers
     public class AddressController : ControllerBase
     {
         private readonly LgdLocationService _locationService;
+        private readonly KarnatakaLocationService _karnatakaLocationService;
 
-        public AddressController(LgdLocationService locationService)
+        public AddressController(LgdLocationService locationService, KarnatakaLocationService karnatakaLocationService)
         {
             _locationService = locationService;
+            _karnatakaLocationService = karnatakaLocationService;
         }
 
         [HttpGet("by-pincode/{pincode}")]
@@ -54,5 +57,12 @@ namespace FarmAPI.Controllers
 
             return Ok(result);
         }
+
+        //[HttpGet("karnataka/hoblis/{district}/{taluka}")]
+        //public async Task<List<HobliItem>> GetHoblis(int district, int taluka)
+        //{
+        //    var filter = Builders<KarnatakaLocation>.Filter.Eq(x => x.DistrictCode, district) & Builders<KarnatakaLocation>.Filter.Eq(x => x.TalukaCode, taluka);
+        //    return await _karnatakaLocationService.Distinct(x => new { x.HobliCode, x.HobliName }, filter).ToListAsync();
+        //}
     }
 }
