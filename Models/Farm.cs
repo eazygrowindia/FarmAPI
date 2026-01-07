@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using FarmAPI.Models.Dtos;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -16,11 +17,8 @@ namespace FarmAPI.Models
         [BsonElement("farmId")]
         public string FarmId { get; set; }
 
-        [BsonElement("surveyNumber")]
-        public required string SurveyNumber { get; set; } = null!;
-
         [BsonElement("address")]
-        public string Address { get; set; } = null!;
+        public FarmAddress Address { get; set; } = null!;
 
         [BsonElement("crops")]
         public List<string> Crops { get; set; }
@@ -88,5 +86,18 @@ namespace FarmAPI.Models
 
         [BsonElement("updatedAt")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    }
+    public class FarmAddress
+    {
+        public string? Pincode { get; set; } = null;
+        public string State { get; set; }
+        public string District { get; set; }
+        public string? SubDistrict { get; set; } = null;
+        public string Village { get; set; }
+        public string? AddressLine { get; set; } = null;
+        public string? Taluka { get; set; } = null;
+        public string? Hobli { get; set; } = null;
+        public string? SurveyNumber { get; set; } = null;
+        public string? Hissa { get; set; } = null;
     }
 }

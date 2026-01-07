@@ -88,8 +88,19 @@ namespace FarmAPI.Controllers
             {
                 FarmName = newFarmDto.FarmName,
                 FarmId = newFarmDto.FarmId,
-                SurveyNumber = newFarmDto.SurveyNumber,
-                Address = newFarmDto.Address,
+                Address = new FarmAddress
+                {
+                    Pincode = newFarmDto.Address.Pincode,
+                    State = newFarmDto.Address.State,
+                    District = newFarmDto.Address.District,
+                    SubDistrict = newFarmDto.Address.SubDistrict,
+                    Village = newFarmDto.Address.Village,
+                    AddressLine = newFarmDto.Address.AddressLine,
+                    Taluka = newFarmDto.Address.Taluka,
+                    Hobli = newFarmDto.Address.Hobli,
+                    SurveyNumber = newFarmDto.Address.SurveyNumber,
+                    Hissa = newFarmDto.Address.Hissa
+                },
                 ShadeNetArea = newFarmDto.ShadeNetArea,
                 GeoLocation = newFarmDto.GeoLocation,
                 FarmPondVolume = newFarmDto.FarmPondVolume,
@@ -134,8 +145,19 @@ namespace FarmAPI.Controllers
             if (existingFarm == null) return NotFound();
 
             existingFarm.FarmName = updatedFarmDto.FarmName;
-            existingFarm.SurveyNumber = updatedFarmDto.SurveyNumber;
-            existingFarm.Address = updatedFarmDto.Address;
+            existingFarm.Address = new FarmAddress
+            {
+                Pincode = updatedFarmDto.Address.Pincode,
+                State = updatedFarmDto.Address.State,
+                District = updatedFarmDto.Address.District,
+                SubDistrict = updatedFarmDto.Address.SubDistrict,
+                Village = updatedFarmDto.Address.Village,
+                AddressLine = updatedFarmDto.Address.AddressLine,
+                Taluka = updatedFarmDto.Address.Taluka,
+                Hobli = updatedFarmDto.Address.Hobli,
+                SurveyNumber = updatedFarmDto.Address.SurveyNumber,
+                Hissa = updatedFarmDto.Address.Hissa
+            };
             existingFarm.ShadeNetArea = updatedFarmDto.ShadeNetArea;
             //existingFarm.GeoTag = updatedFarmDto.GeoTag;
             existingFarm.FarmPondVolume = updatedFarmDto.FarmPondVolume;

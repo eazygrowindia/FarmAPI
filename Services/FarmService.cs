@@ -200,7 +200,6 @@ namespace FarmAPI.Services
                 filter,
                 Builders<Farm>.Update
                     .Set(f => f.FarmName, updatedFarm.FarmName)
-                    .Set(f => f.SurveyNumber, updatedFarm.SurveyNumber)
                     .Set(f => f.Address, updatedFarm.Address)
                     .Set(f => f.ShadeNetArea, updatedFarm.ShadeNetArea)
                     //.Set(f => f.GeoTag, updatedFarm.GeoTag)

@@ -6,7 +6,7 @@ namespace FarmAPI.Models.Dtos
     {
         public string FarmName { get; set; } = null!;
         public string SurveyNumber { get; set; } = null!;
-        public string Address { get; set; } = null!;
+        public FarmAddress Address { get; set; }
         public List<string> Crops { get; set; }
         public double ShadeNetArea { get; set; }
         //public LatLong GeoTag { get; set; }
