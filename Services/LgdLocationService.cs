@@ -83,28 +83,73 @@ namespace FarmAPI.Services
                 .OrderBy(s => s.SubdistrictName)
                 .ToList();
 
-            var villages = docs
-                .GroupBy(d => new { d.VillageCode, d.VillageName })
-                .Select(g => new VillageInfo
-                {
-                    VillageCode = g.Key.VillageCode,
-                    VillageName = g.Key.VillageName
-                })
-                .OrderBy(v => v.VillageName)
-                .ToList();
+            //var villages = docs
+            //    .GroupBy(d => new { d.VillageCode, d.VillageName })
+            //    .Select(g => new VillageInfo
+            //    {
+            //        VillageCode = g.Key.VillageCode,
+            //        VillageName = g.Key.VillageName
+            //    })
+            //    .OrderBy(v => v.VillageName)
+            //    .ToList();
 
             return new PincodeResponse
             {
                 State = state,
                 Districts = districts,
                 Subdistricts = subdistricts,
-                Villages = villages
+                //Villages = villages
             };
+        }
+
+        public async Task<StateInfo> GetStateByPincodeAsync(string pincode)
+        {
+            var docs = await _collection.Find(x => x.Pincode == pincode).ToListAsync();
+
+            var state = docs
+                .GroupBy(d => new { d.StateCode, d.StateName })
+                .Select(g => new StateInfo
+                {
+                    StateCode = g.Key.StateCode,
+                    StateName = g.Key.StateName
+                })
+                .Single();
+
+            return state;
+        }
+
+        public async Task<List<StateInfo>> GetStatesAsync()
+        {
+            var pipeline = new[]
+            {
+                BsonDocument.Parse("{ $group: { _id: { StateCode: '$StateCode', StateName: '$StateName' } } }"),
+                BsonDocument.Parse("{ $sort: { '_id.StateName': 1 } }"),
+                BsonDocument.Parse("{ $project: { StateCode: '$_id.StateCode', StateName: '$_id.StateName', _id: 0 } }")
+            };
+
+            var states = await _collection.Aggregate<StateInfo>(pipeline).ToListAsync();
+            return states;
         }
 
         public async Task<List<DistrictInfo>> GetDistrictsAsync(string pincode)
         {
             var docs = await _collection.Find(x => x.Pincode == pincode).ToListAsync();
+
+            var districts = docs
+                .GroupBy(d => new { d.DistrictCode, d.DistrictName })
+                .Select(g => new DistrictInfo
+                {
+                    DistrictCode = g.Key.DistrictCode,
+                    DistrictName = g.Key.DistrictName
+                })
+                .OrderBy(d => d.DistrictName)
+                .ToList();
+            return districts;
+        }
+
+        public async Task<List<DistrictInfo>> GetDistrictsByStateAsync(string state)
+        {
+            var docs = await _collection.Find(x => x.StateName.ToLower().Trim() == state.ToLower().Trim()).ToListAsync();
 
             var districts = docs
                 .GroupBy(d => new { d.DistrictCode, d.DistrictName })
@@ -140,6 +185,23 @@ namespace FarmAPI.Services
             return subdistricts;
         }
 
+        public async Task<List<SubdistrictResponse>> GetSubdistrictsByDistrictAsync(int districtCode)
+        {
+            var docs = await _collection.Find(x => x.DistrictCode == districtCode).ToListAsync();
+
+            var subdistricts = docs
+                .GroupBy(d => new { d.SubdistrictCode, d.SubdistrictName })
+                .Select(g => new SubdistrictResponse
+                {
+                    SubDistrictCode = g.Key.SubdistrictCode,
+                    SubDistrictName = g.Key.SubdistrictName
+                })
+                .OrderBy(s => s.SubDistrictName)
+                .ToList();
+
+            return subdistricts;
+        }
+
         public async Task<List<VillageInfo>> GetVillagesAsync(string pincode, int districtCode, int subdistrictCode)
         {
             var filter = Builders<LgdLocation>.Filter.And(
@@ -149,6 +211,23 @@ namespace FarmAPI.Services
             );
 
             var docs = await _collection.Find(filter).ToListAsync();
+
+            var villages = docs
+                .GroupBy(d => new { d.VillageCode, d.VillageName })
+                .Select(g => new VillageInfo
+                {
+                    VillageCode = g.Key.VillageCode,
+                    VillageName = g.Key.VillageName
+                })
+                .OrderBy(v => v.VillageName)
+                .ToList();
+
+            return villages;
+        }
+
+        public async Task<List<VillageInfo>> GetVillagesBySubDistrictAsync(string subDistrictName)
+        {
+            var docs = await _collection.Find(x => x.SubdistrictName.ToLower().Trim() == subDistrictName.ToLower().Trim()).ToListAsync();
 
             var villages = docs
                 .GroupBy(d => new { d.VillageCode, d.VillageName })

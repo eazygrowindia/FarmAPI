@@ -4,6 +4,19 @@ using System.Text.Json.Serialization;
 
 namespace FarmAPI.Models
 {
+    public class TalukaResponse
+    {
+        public int TalukaCode { get; set; }
+        public string TalukaName { get; set; }
+    }
+
+    public class HobliResponse
+    {
+        public int HobliCode { get; set; }
+
+        public string HobliName { get; set; }
+    }
+
     public class DistrictItem { public int DistrictCode { get; set; } public string DistrictName { get; set; } = string.Empty; }
     //public class TalukaItem { public int TALUKA_CODE { get; set; } public string TALUKA_NAME { get; set; } = string.Empty; }
     //public class HobliItem { public int HOBLI_CODE { get; set; } public string HOBLI_NAME { get; set; } = string.Empty; }
@@ -35,7 +48,6 @@ namespace FarmAPI.Models
         [JsonPropertyName("VILLAGE_NAME")]
         public string VILLAGE_NAME { get; set; } = string.Empty;
     }
-
 
     public class KarnatakaLocation
     {

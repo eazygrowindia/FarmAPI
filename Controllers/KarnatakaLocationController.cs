@@ -13,9 +13,9 @@ namespace EasyGrow.Api.Controllers
     //[ApiExplorerSettings(IgnoreApi = true)] // Hide from Swagger unless admin
     public class KarnatakaLocationController : ControllerBase
     {
-        private readonly KarnatakaLocationService _importService;
+        private readonly KarnatakaImportService _importService;
 
-        public KarnatakaLocationController(KarnatakaLocationService importService)
+        public KarnatakaLocationController(KarnatakaImportService importService)
         {
             _importService = importService;
         }

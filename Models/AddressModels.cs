@@ -112,6 +112,12 @@ namespace FarmAPI.Models
         public string SubdistrictName { get; set; } = string.Empty;
     }
 
+    public class SubdistrictResponse
+    {
+        public int SubDistrictCode { get; set; }
+        public string SubDistrictName { get; set; } = string.Empty;
+    }
+
     public class VillageInfo
     {
         public long VillageCode { get; set; }

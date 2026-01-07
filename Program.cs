@@ -87,6 +87,7 @@ namespace FarmAPI
 
             builder.Services.AddScoped<LgdLocationService>();
             builder.Services.AddScoped<LgdImportService>();
+            builder.Services.AddScoped<KarnatakaImportService>();
             builder.Services.AddScoped<KarnatakaLocationService>();
 
             var jwt = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
