@@ -5,6 +5,7 @@ namespace FarmAPI.Models.Dtos
     public class CreateMaintainerDto
     {
         public string MaintainerId { get; set; } = null!;
+        public string FarmOwnerId { get; set; } = null!;
         public string MaintainerName { get; set; } = null!;
         public string ContactNumber { get; set; } = null!;
         public string AlternateContactNumber { get; set; }
@@ -13,8 +14,6 @@ namespace FarmAPI.Models.Dtos
         public string IdentityProofDocument { get; set; } = null!;
         public string IdentityProofNumber { get; set; } = null!;
         public string TrainingCertificateUrl { get; set; }
-        public List<string> FarmsMaintained { get; set; } = new List<string>();
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
     }

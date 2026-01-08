@@ -36,11 +36,11 @@ namespace FarmAPI.Models
         [BsonElement("address")]
         public string Address { get; set; } = null!;
 
-        [BsonElement("farmsOwned")]
-        public List<string> FarmsOwned { get; set; }
+        //[BsonElement("farmsOwned")]
+        //public List<string> FarmsOwned { get; set; }
 
-        [BsonElement("maintainers")]
-        public List<string> Maintainers { get; set; }
+        //[BsonElement("maintainers")]
+        //public List<string> Maintainers { get; set; }
 
         [BsonElement("systemStatus")]
         public string SystemStatus { get; set; } = null!;
@@ -50,5 +50,11 @@ namespace FarmAPI.Models
 
         [BsonElement("updatedAt")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public class OwnerPartial
+    {
+        public string OwnerId { get; set; }
+        public string OwnerName { get; set; } = null!;
     }
 }

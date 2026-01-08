@@ -16,6 +16,17 @@ namespace FarmAPI.Services
         public async Task<List<Maintainer>> GetAsync() =>
             await _maintainerCollection.Find(_ => true).ToListAsync();
 
+        public async Task<List<MaintainerPartial>> GetAllFarmOwnersNameAsync(string ownerId)
+        {
+            var projections = Builders<Maintainer>.Projection
+                .Include(o => o.MaintainerId)
+                .Include(o => o.MaintainerName)
+                .Exclude("_id");
+
+            var maintainers = await _maintainerCollection.Find(_ => true).Project<MaintainerPartial>(projections).ToListAsync();
+            return maintainers;
+        }
+
         public async Task<Maintainer?> GetAsync(string id) =>
             await _maintainerCollection.Find(x => x.MaintainerId == id).FirstOrDefaultAsync();
 

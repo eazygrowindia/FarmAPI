@@ -10,9 +10,13 @@ namespace FarmAPI.Controllers
     public class OwnerController : ControllerBase
     {
         private readonly OwnerService _ownerService;
+        private readonly UserRepository _userService;
 
-        public OwnerController(OwnerService ownerService) =>
+        public OwnerController(OwnerService ownerService, UserRepository userRepository)
+        {
             _ownerService = ownerService;
+            _userService = userRepository;
+        }
 
         [HttpGet]
         public async Task<List<Owner>> Get() =>
@@ -31,6 +35,12 @@ namespace FarmAPI.Controllers
             return existingOwner;
         }
 
+        [HttpGet("GetAllFarmOwnersName")]
+        public async Task<List<OwnerPartial>> GetAllFarmOwnersNames() { 
+            var owners = await _ownerService.GetAllFarmOwnersNameAsync();
+            return owners;
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateOwnerDto newOwnerDto)
         {
@@ -44,20 +54,32 @@ namespace FarmAPI.Controllers
                 AlternateContactNumber = newOwnerDto.AlternateContactNumber,
                 Address = newOwnerDto.Address,
                 EmailId = newOwnerDto.EmailId,
-                FarmsOwned = newOwnerDto.FarmsOwned,
-                Maintainers = newOwnerDto.Maintainers,
+                //FarmsOwned = newOwnerDto.FarmsOwned,
+                //Maintainers = newOwnerDto.Maintainers,
                 SystemStatus = "Active"
             };
 
-            //TODO: Check based on OwnerId uniqueness is not enough, as it is by default unique.
-            //Check has to be done on OwnerName/FarmerName as well to avoid duplicate farms.
             var existingOwner = await _ownerService.GetAsync(newOwner.OwnerId);
             if (existingOwner != null)
             {
                 var problem = new ProblemDetails
                 {
                     Title = "Item already exists",
-                    Detail = $"A maintainer with MaintainerId '{newOwner.OwnerId}' already exists.",
+                    Detail = $"A FarmOwner with OwnerId '{newOwner.OwnerId}' already exists.",
+                    Status = StatusCodes.Status400BadRequest,
+                    Instance = HttpContext.Request.Path
+                };
+                return BadRequest(problem);
+            }
+
+            var existingOwnerWithMobile = await _ownerService.GetAsyncByMobile(newOwner.ContactNumber);
+            var existingUserWithMobile = await _userService.GetByMobileAsync(newOwner.ContactNumber);
+            if (existingOwnerWithMobile != null || existingUserWithMobile != null)
+            {
+                var problem = new ProblemDetails
+                {
+                    Title = "Item already exists",
+                    Detail = $"A FarmOwner with the same contact number already exists.",
                     Status = StatusCodes.Status400BadRequest,
                     Instance = HttpContext.Request.Path
                 };
@@ -65,6 +87,10 @@ namespace FarmAPI.Controllers
             }
 
             await _ownerService.CreateAsync(newOwner);
+
+            //create user for the owner
+            await _userService.CreateUserWithPasswordAsync(newOwner.OwnerName, newOwner.ContactNumber
+                , newOwner.EmailId, new List<string> { UserRoles.FARMOWNER.ToString() });
 
             return CreatedAtAction(nameof(Get), new { id = newOwner.Id }, newOwner);
         }
@@ -87,8 +113,8 @@ namespace FarmAPI.Controllers
             existingOwner.AlternateContactNumber = updatedOwnerDto.AlternateContactNumber;
             existingOwner.Address = updatedOwnerDto.Address;
             existingOwner.EmailId = updatedOwnerDto.EmailId;
-            existingOwner.FarmsOwned = updatedOwnerDto.FarmsOwned;
-            existingOwner.Maintainers = updatedOwnerDto.Maintainers;
+            //existingOwner.FarmsOwned = updatedOwnerDto.FarmsOwned;
+            //existingOwner.Maintainers = updatedOwnerDto.Maintainers;
             existingOwner.SystemStatus = updatedOwnerDto.SystemStatus;
 
             await _ownerService.UpdateAsync(id, existingOwner);

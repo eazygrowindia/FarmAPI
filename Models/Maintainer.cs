@@ -13,6 +13,9 @@ namespace FarmAPI.Models
         [BsonElement("maintainerId")]
         public string MaintainerId { get; set; }
 
+        [BsonElement("farmOwnerId")]
+        public string FarmOwnerId { get; set; }
+
         [BsonElement("userId")]
         public string UserId { get; set; }  //points to the user collection
 
@@ -58,8 +61,8 @@ namespace FarmAPI.Models
         /// <summary>
         /// List of Farm IDs maintained by the maintainer/assitant
         /// </summary>
-        [BsonElement("farmsMaintained")]
-        public List<string> FarmsMaintained { get; set; }
+        //[BsonElement("farmsMaintained")]
+        //public List<string> FarmsMaintained { get; set; }
 
         /// <summary>
         /// this determines the access level of the maintainer/assitant in the system
@@ -78,5 +81,11 @@ namespace FarmAPI.Models
 
         [BsonElement("updatedAt")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public class MaintainerPartial
+    {
+        public string MaintainerId { get; set; }
+        public string MaintainerName { get; set; }
     }
 }

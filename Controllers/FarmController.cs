@@ -115,7 +115,9 @@ namespace FarmAPI.Controllers
                 //FarmhouseNote = newFarmDto.FarmhouseNote,
                 StorageAreaNote = newFarmDto.StorageAreaNote,
                 WeatherData = newFarmDto.historicalWeather,
-                Crops = new List<string>()
+                FarmOwnerId = newFarmDto.FarmOwnerId,
+                FarmMaintainerId = newFarmDto.FarmMaintainerId,
+                //Crops = new List<string>()
             };
 
             //REVIEW: Check based on FarmId uniqueness is not enough, as it is by default unique.
@@ -172,11 +174,11 @@ namespace FarmAPI.Controllers
             //existingFarm.FarmhouseNote = updatedFarmDto.FarmhouseNote;
             existingFarm.StorageAreaNote = updatedFarmDto.StorageAreaNote;
 
-            if(existingFarm.Crops == null)
-            {
-                existingFarm.Crops = new List<string>();
-            }
-            existingFarm.Crops = updatedFarmDto.Crops;
+            //if(existingFarm.Crops == null)
+            //{
+            //    existingFarm.Crops = new List<string>();
+            //}
+            //existingFarm.Crops = updatedFarmDto.Crops;
 
             await _farmService.UpdateAsync(id, existingFarm);
             return NoContent();

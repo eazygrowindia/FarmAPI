@@ -10,9 +10,13 @@ namespace FarmAPI.Controllers
     public class MaintainerController : ControllerBase
     {
         private readonly MaintainerService _maintainerService;
+        private readonly UserRepository _userService;
 
-        public MaintainerController(MaintainerService maintainerService) =>
+        public MaintainerController(MaintainerService maintainerService, UserRepository userRepository)
+        {
             _maintainerService = maintainerService;
+            _userService = userRepository;
+        }
 
         [HttpGet]
         public async Task<List<Maintainer>> Get() =>
@@ -45,7 +49,8 @@ namespace FarmAPI.Controllers
                 TrainingCertificateUrl = newMaintainerDto.TrainingCertificateUrl,
                 IdentityProofDocument = newMaintainerDto.IdentityProofDocument,
                 IdentityProofNumber = newMaintainerDto.IdentityProofNumber,
-                FarmsMaintained = newMaintainerDto.FarmsMaintained,
+                FarmOwnerId = newMaintainerDto.FarmOwnerId,
+                //FarmsMaintained = newMaintainerDto.FarmsMaintained,
                 //Role = newMaintainerDto.Role,
                 SystemStatus = "Active"
             };
@@ -56,7 +61,21 @@ namespace FarmAPI.Controllers
                 var problem = new ProblemDetails
                 {
                     Title = "Item already exists",
-                    Detail = $"A newMaintainer with MaintainerId '{newMaintainer.MaintainerId}' already exists.",
+                    Detail = $"A Maintainer with MaintainerId '{newMaintainer.MaintainerId}' already exists.",
+                    Status = StatusCodes.Status400BadRequest,
+                    Instance = HttpContext.Request.Path
+                };
+                return BadRequest(problem);
+            }
+
+            var existingMaintainerWithMobile = await _maintainerService.GetAsyncByMobile(newMaintainer.ContactNumber);
+            var existingUserWithMobile = await _userService.GetByMobileAsync(newMaintainer.ContactNumber);
+            if (existingMaintainerWithMobile != null || existingUserWithMobile != null)
+            {
+                var problem = new ProblemDetails
+                {
+                    Title = "Item already exists",
+                    Detail = $"A Maintainer with the same contact number already exists.",
                     Status = StatusCodes.Status400BadRequest,
                     Instance = HttpContext.Request.Path
                 };
@@ -64,6 +83,10 @@ namespace FarmAPI.Controllers
             }
 
             await _maintainerService.CreateAsync(newMaintainer);
+
+            //create user for the owner
+            await _userService.CreateUserWithPasswordAsync(newMaintainer.MaintainerName, newMaintainer.ContactNumber
+                , string.Empty, new List<string> { UserRoles.FARMHELP.ToString() });
 
             return CreatedAtAction(nameof(Get), new { id = newMaintainer.Id }, newMaintainer);
         }
@@ -80,10 +103,11 @@ namespace FarmAPI.Controllers
             existingMaintainer.AlternateContactNumber = updatedMaintainerDto.AlternateContactNumber;
             existingMaintainer.IdentityProofDocument = updatedMaintainerDto.IdentityProofDocument;
             existingMaintainer.IdentityProofNumber = updatedMaintainerDto.IdentityProofNumber;
-            existingMaintainer.FarmsMaintained = updatedMaintainerDto.FarmsMaintained;
+            //existingMaintainer.FarmsMaintained = updatedMaintainerDto.FarmsMaintained;
             //existingMaintainer.Role = updatedMaintainerDto.Role;
             existingMaintainer.SystemStatus = updatedMaintainerDto.SystemStatus;
 
+            //TODO : Handle this as update and no replace
             await _maintainerService.UpdateAsync(id, existingMaintainer);
             return NoContent();
         }

@@ -12,12 +12,15 @@ namespace FarmAPI.Services
         private readonly IMongoCollection<User> _users;
         private OwnerService _ownerService;
         private MaintainerService _maintainerService;
+        private readonly PasswordHasher _passwordHasher;
 
-        public UserRepository(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings, OwnerService ownerService, MaintainerService maintainerService)
+        public UserRepository(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings
+            , OwnerService ownerService, MaintainerService maintainerService, PasswordHasher passwordHasher)
         {
             _users = db.FarmGrow.GetCollection<User>(settings.Value.UsersCollectionName);
             _ownerService = ownerService;
             _maintainerService = maintainerService;
+            _passwordHasher = passwordHasher;
         }
 
         public Task<List<User>?> GetAllAsync() =>
@@ -90,6 +93,26 @@ namespace FarmAPI.Services
         }
 
         /// <summary>
+        /// Used internally by FarmOwner & Maintainer services to create corresponding user with password
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="mobile"></param>
+        /// <param name="email"></param>
+        /// <param name="roles"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public async Task<User> CreateUserWithPasswordAsync(string name, string mobile, string? email = null, List<string>? roles = null, string password = "12345678")
+        {
+            var newUser = await CreateUserAsync(name, mobile, email, roles);
+            var (hash, salt) = _passwordHasher.HashPassword(password);
+            newUser.PasswordHash = hash;
+            newUser.PasswordSalt = salt;
+
+            await UpdatePasswordAsync(newUser.UserId, hash, salt);
+            return newUser;
+        }
+
+        /// <summary>
         /// Used by Register functionality to create a user
         /// </summary>
         /// <param name="mobile"></param>
@@ -102,10 +125,19 @@ namespace FarmAPI.Services
             // This logic needs a transactional approach as multiple mongo collection update * insert are involved
             // Any error in between will put the collections out of sync
 
-            var newRoles = new List<string>();
-            foreach(var role in roles)
+            var users = await GetAllAsync();
+            if(!users.Any())
             {
-                newRoles.Add(UserRolesHelper.GetRole(role).ToString());
+                roles = new List<string> { UserRoles.EASYGROWADMIN.ToString() };
+            }
+
+            var newRoles = new List<string>();
+            if(roles != null)
+            {
+                foreach (var role in roles)
+                {
+                    newRoles.Add(UserRolesHelper.GetRole(role).ToString());
+                }
             }
 
             //create user

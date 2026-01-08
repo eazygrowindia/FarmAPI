@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace FarmAPI.Models.Dtos
 {
@@ -6,6 +7,8 @@ namespace FarmAPI.Models.Dtos
     {
         public string FarmName { get; set; } = null!;
         public string FarmId { get; set; } = null!;
+        public string FarmMaintainerId { get; set; }
+        public string FarmOwnerId { get; set; }
         public FarmAddress Address { get; set; }
         public double ShadeNetArea { get; set; }
         public LatLong GeoLocation { get; set; }

@@ -45,11 +45,16 @@ namespace FarmAPI.Services
             List<FarmPartial> farmCollection = new List<FarmPartial>();
             var projection = Builders<Farm>.Projection.Include(f => f.FarmId)
                                            .Include(f => f.FarmName)
-                                           .Include(f => f.Crops)
+                                           //.Include(f => f.Crops)
                                            .Exclude("_id");
             var searchfilter = Builders<Farm>.Filter.Or(
                 Builders<Farm>.Filter.Regex(x => x.FarmId, new BsonRegularExpression(searchTerm, "i")),
                 Builders<Farm>.Filter.Regex(x => x.FarmName, new BsonRegularExpression(searchTerm, "i"))
+            );
+
+            var searchfilterCrop = Builders<Crop>.Filter.Or(
+                Builders<Crop>.Filter.Regex(x => x.CropId, new BsonRegularExpression(searchTerm, "i")),
+                Builders<Crop>.Filter.Regex(x => x.CropName, new BsonRegularExpression(searchTerm, "i"))
             );
 
             if (UserRolesHelper.HasRole(roles, UserRoles.FARMOWNER))
@@ -59,25 +64,33 @@ namespace FarmAPI.Services
                 var owner = await _ownerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
                 if (owner != null)
                 {
-                    farms = owner.FarmsOwned;
+                    //farms = owner.FarmsOwned;
+
+                    //var farmIdfilter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
+                    //var filter = farmIdfilter & searchfilter;
+                    //farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+
+                    var filter = Builders<Farm>.Filter.Eq(f => f.FarmOwnerId, owner.OwnerId) & searchfilter;
+                    farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
                 }
-                var farmIdfilter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
-                var filter = farmIdfilter & searchfilter;
-                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
             }
 
             if (UserRolesHelper.HasRole(roles, UserRoles.FARMHELP))
             {
                 //get all farms from maintainer collection
                 List<string> farms = new List<string>();
-                var owner = await _maintainerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
-                if (owner != null)
+                var maintainer = await _maintainerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
+                if (maintainer != null)
                 {
-                    farms = owner.FarmsMaintained;
+                    //farms = owner.FarmsMaintained;
+
+                    //var farmIdfilter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
+                    //var filter = farmIdfilter & searchfilter;
+                    //farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+
+                    var filter = Builders<Farm>.Filter.Eq(f => f.FarmMaintainerId, maintainer.MaintainerId) & searchfilter;
+                    farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
                 }
-                var farmIdfilter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
-                var filter = farmIdfilter & searchfilter;
-                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
             }
 
             if (UserRolesHelper.HasRole(roles, UserRoles.EASYGROWADMIN))
@@ -96,17 +109,21 @@ namespace FarmAPI.Services
             foreach (var farm in farmCollection)
             {
                 var cropDetails = new List<CropPartial>();
-                if (farm.Crops != null && farm.Crops.Count > 0)
-                {
-                    foreach (var cropId in farm.Crops)
-                    {
-                        var crop = await _cropCollection.Find(c => c.CropId == cropId).Project<CropPartial>(cropProjection).FirstOrDefaultAsync();
-                        if (crop != null)
-                        {
-                            cropDetails.Add(crop);
-                        }
-                    }
-                }
+                //if (farm.Crops != null && farm.Crops.Count > 0)
+                //{
+                //    foreach (var cropId in farm.Crops)
+                //    {
+                //        var crop = await _cropCollection.Find(c => c.CropId == cropId).Project<CropPartial>(cropProjection).FirstOrDefaultAsync();
+                //        if (crop != null)
+                //        {
+                //            cropDetails.Add(crop);
+                //        }
+                //    }
+                //}
+                var filterCrops = Builders<Crop>.Filter.Eq(c => c.FarmId, farm.FarmId) | searchfilterCrop;
+                var crops = await _cropCollection.Find(filterCrops).Project<CropPartial>(cropProjection).ToListAsync();
+                cropDetails.AddRange(crops);
+
                 farm.CropDetail = cropDetails;
             }
 
@@ -118,7 +135,7 @@ namespace FarmAPI.Services
             List<FarmPartial> farmCollection = new List<FarmPartial>();
             var projection = Builders<Farm>.Projection.Include(f => f.FarmId)
                                            .Include(f => f.FarmName)
-                                           .Include(f => f.Crops)
+                                           //.Include(f => f.Crops)
                                            .Exclude("_id");
 
             if (UserRolesHelper.HasRole(roles, UserRoles.FARMOWNER))
@@ -126,25 +143,33 @@ namespace FarmAPI.Services
                 //get all farms from owner collection
                 List<string> farms = new List<string>();
                 var owner = await _ownerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
-                if(owner != null)
+                if (owner != null)
                 {
-                    farms = owner.FarmsOwned;
+                    //    farms = owner.FarmsOwned;
+                    //}
+                    //var filter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
+                    //farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+
+                    var filter = Builders<Farm>.Filter.Eq(f => f.FarmOwnerId, owner.OwnerId);
+                    farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
                 }
-                var filter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
-                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
             }
 
             if (UserRolesHelper.HasRole(roles, UserRoles.FARMHELP))
             {
                 //get all farms from maintainer collection
                 List<string> farms = new List<string>();
-                var owner = await _maintainerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
-                if (owner != null)
+                var maintainer = await _maintainerCollection.Find(o => o.UserId == userId).FirstOrDefaultAsync();
+                if (maintainer != null)
                 {
-                    farms = owner.FarmsMaintained;
+                    //    farms = owner.FarmsMaintained;
+                    //}
+                    //var filter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
+                    //farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+
+                    var filter = Builders<Farm>.Filter.Eq(f => f.FarmMaintainerId, maintainer.MaintainerId);
+                    farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
                 }
-                var filter = Builders<Farm>.Filter.In(f => f.FarmId, farms);
-                farmCollection = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
             }
 
             if (UserRolesHelper.HasRole(roles, UserRoles.EASYGROWADMIN))
@@ -161,17 +186,22 @@ namespace FarmAPI.Services
             foreach (var farm in farmCollection)
             {
                 var cropDetails = new List<CropPartial>();
-                if (farm.Crops != null && farm.Crops.Count > 0)
-                {
-                    foreach (var cropId in farm.Crops)
-                    {
-                        var crop = await _cropCollection.Find(c => c.CropId == cropId).Project<CropPartial>(cropProjection).FirstOrDefaultAsync();
-                        if (crop != null)
-                        {
-                            cropDetails.Add(crop);
-                        }
-                    }
-                }
+                //if (farm.Crops != null && farm.Crops.Count > 0)
+                //{
+                //    foreach (var cropId in farm.Crops)
+                //    {
+                //        var crop = await _cropCollection.Find(c => c.CropId == cropId).Project<CropPartial>(cropProjection).FirstOrDefaultAsync();
+                //        if (crop != null)
+                //        {
+                //            cropDetails.Add(crop);
+                //        }
+                //    }
+                //}
+
+                var filterCrops = Builders<Crop>.Filter.Eq(c => c.FarmId, farm.FarmId);
+                var crops = await _cropCollection.Find(filterCrops).Project<CropPartial>(cropProjection).ToListAsync();
+                cropDetails.AddRange(crops);
+
                 farm.CropDetail = cropDetails;
             }
 
@@ -215,7 +245,7 @@ namespace FarmAPI.Services
                     .Set(f => f.AutomationRoomSize, updatedFarm.AutomationRoomSize)
                     .Set(f => f.FarmhouseNote, updatedFarm.FarmhouseNote)
                     .Set(f => f.StorageAreaNote, updatedFarm.StorageAreaNote)
-                    .Set(f => f.Crops, updatedFarm.Crops)
+                    //.Set(f => f.Crops, updatedFarm.Crops)
                     .Set(f => f.UpdatedAt, DateTime.UtcNow)
             );
         }

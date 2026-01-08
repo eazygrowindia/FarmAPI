@@ -15,6 +15,16 @@ namespace FarmAPI.Services
         public async Task<List<Owner>> GetAsync() =>
             await _ownerCollection.Find(_ => true).ToListAsync();
 
+        public async Task<List<OwnerPartial>> GetAllFarmOwnersNameAsync()
+        {
+            var projections = Builders<Owner>.Projection
+                .Include(o => o.OwnerId)
+                .Include(o => o.OwnerName)
+                .Exclude("_id");
+            var owners = await _ownerCollection.Find(_ => true).Project<OwnerPartial>(projections).ToListAsync();
+            return owners;
+        }
+
         public async Task<Owner?> GetAsync(string id) =>
             await _ownerCollection.Find(x => x.OwnerId == id).FirstOrDefaultAsync();
 

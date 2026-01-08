@@ -17,11 +17,17 @@ namespace FarmAPI.Models
         [BsonElement("farmId")]
         public string FarmId { get; set; }
 
+        [BsonElement("farmMaintainerId")]
+        public string FarmMaintainerId { get; set; }
+
+        [BsonElement("farmOwnerId")]
+        public string FarmOwnerId { get; set; }
+
         [BsonElement("address")]
         public FarmAddress Address { get; set; } = null!;
 
-        [BsonElement("crops")]
-        public List<string> Crops { get; set; }
+        //[BsonElement("crops")]
+        //public List<string> Crops { get; set; }
 
         /// <summary>
         /// Area covered under shade net in square meters
