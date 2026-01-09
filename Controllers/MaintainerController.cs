@@ -1,10 +1,12 @@
 ﻿using FarmAPI.Models;
 using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FarmAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MaintainerController : ControllerBase

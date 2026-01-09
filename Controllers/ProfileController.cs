@@ -6,9 +6,9 @@ using System.Security.Claims;
 
 namespace FarmAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Requires JWT token
     public class ProfileController : ControllerBase
     {
         private readonly UserRepository userService;

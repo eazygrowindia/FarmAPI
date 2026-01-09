@@ -1,5 +1,6 @@
-﻿using FarmAPI.Services;
-using FarmAPI.Models;
+﻿using FarmAPI.Models;
+using FarmAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic.FileIO;
@@ -8,6 +9,7 @@ using System.IO;
 
 namespace EasyGrow.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/admin/[controller]")]
     //[ApiExplorerSettings(IgnoreApi = true)] // Hide from Swagger unless admin

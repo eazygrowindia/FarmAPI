@@ -140,7 +140,7 @@ namespace FarmAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
 
-            //builder.Services.AddSwaggerGen();
+            // Configure Swagger to document the cookie-based scheme (browser will send the cookie)
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -151,6 +151,23 @@ namespace FarmAPI
                 });
 
                 c.EnableAnnotations();
+
+                // Optional: Bearer for Swagger paste
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { 
+                        new OpenApiSecurityScheme 
+                        { 
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } 
+                        }, Array.Empty<string>() 
+                    }
+                });
             });
 
             // Read origins from config
@@ -201,15 +218,19 @@ namespace FarmAPI
                 app.UseHsts();
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI();
-
+            
             app.UseSession();
             app.UseCors("AllowAngularApp");
             app.UseHttpsRedirection();
+
+            // Ensure authentication runs before serving Swagger UI / JSON so middleware can validate cookie
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseSwagger();
+            app.UseSwaggerUI(c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Farm API v1");
+            });
 
             app.MapControllers();
 

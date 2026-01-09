@@ -1,6 +1,7 @@
 ﻿using FarmAPI.Models;
 using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace FarmAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class FileUploadController : ControllerBase

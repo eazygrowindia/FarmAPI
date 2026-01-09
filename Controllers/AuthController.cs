@@ -13,7 +13,7 @@ using System.Text;
 
 namespace FarmAPI.Controllers
 {
-
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -139,6 +139,7 @@ namespace FarmAPI.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("login-with-password")]
         public async Task<IActionResult> LoginWithPassword([FromBody] PasswordLoginRequest req)
         {
@@ -171,6 +172,7 @@ namespace FarmAPI.Controllers
             return Ok(new { message = "Login successful", userId = user.Id, mobile = user.Mobile });
         }
 
+        [AllowAnonymous]
         [HttpPost("logout")]
         public IActionResult Logout()
         {

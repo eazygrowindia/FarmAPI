@@ -1,11 +1,13 @@
 ﻿using FarmAPI.Models;
 using FarmAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.Text.Json.Serialization;
 
 namespace FarmAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AddressController : ControllerBase
