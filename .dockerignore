@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+.git
+.gitignore
+docker-compose.override.yml
+**/appsettings.Development.json
+**/secrets.json

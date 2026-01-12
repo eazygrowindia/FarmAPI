@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  farmapi:
+    build: .
+    ports:
+      - "8080:80"
+    restart: always
+    environment:
+      # MongoDB - FarmGrow
+      - FarmGrowDatabase__ConnectionString=mongodb://mongo-farm:27017
+      - FarmGrowDatabase__DatabaseName=EasyGrow_v1
+      - FarmGrowDatabase__OwnerCollectionName=Owner
+      # MongoDB - AddressLoader  
+      - AddressLoaderDatabase__ConnectionString=mongodb://mongo-address:27017
+      - AddressLoaderDatabase__DatabaseName=AddressDirectory_v1
+      # JWT (REGENERATE THIS KEY!)
+      - Jwt__Issuer=EasyGrow
+      - Jwt__Audience=EasyGrow-Users
+      - Jwt__Key=your-super-secure-random-64-char-jwt-key-here-change-this
+      # File storage (volume mounted)
+      - FileStore__BaseFolderPath=/app/files
+      - FileStore__ImagesFolderName=Images
+      - FileStore__AudioFolderName=Audio
+      # Production settings
+      - Cors__AllowedOrigins=https://yourdomain.com
+      - Fido2__Origin=https://yourdomain.com
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - AllowedHosts=*
+    volumes:
+      - farmapi_files:/app/files
+    depends_on:
+      - mongo-farm
+      - mongo-address
+
+  mongo-farm:
+    image: mongo:8
+    volumes:
+      - mongo_farm_data:/data/db
+    restart: always
+
+  mongo-address:
+    image: mongo:8
+    volumes:
+      - mongo_address_data:/data/db
+    restart: always
+
+volumes:
+  farmapi_files:
+  mongo_farm_data:
+  mongo_address_data:
