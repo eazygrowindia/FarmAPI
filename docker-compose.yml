@@ -22,8 +22,8 @@ services:
       - FileStore__ImagesFolderName=Images
       - FileStore__AudioFolderName=Audio
       # Production settings
-      - Cors__AllowedOrigins=https://trace.eazygrowindia.com/
-      - Fido2__Origin=https://yourdomain.com
+      - Cors__AllowedOrigins="http://localhost:4200:https://*.eazygrowindia.com/"
+      - Fido2__Origin="https://yourdomain.com"
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - AllowedHosts=*

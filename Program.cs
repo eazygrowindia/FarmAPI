@@ -179,7 +179,7 @@ namespace FarmAPI
             {
                 options.AddPolicy("AllowAngularApp", policy =>
                 {
-                    policy.WithOrigins("https://*.eazygrowindia.com/")
+                    policy.WithOrigins(allowedOrigins)
                           .SetIsOriginAllowedToAllowWildcardSubdomains()
                           .AllowAnyMethod()
                           .AllowAnyHeader()
