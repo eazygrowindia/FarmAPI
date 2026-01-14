@@ -41,6 +41,7 @@ namespace FarmAPI.Controllers
         public record PasswordRegisterRequest(string Name,string Mobile,string Password,string? Email);
         public record PasswordLoginRequest(string Mobile, string Password);
 
+        [AllowAnonymous]
         [HttpPost("register-with-password")]
         public async Task<IActionResult> RegisterWithPassword([FromBody] PasswordRegisterRequest req)
         {
