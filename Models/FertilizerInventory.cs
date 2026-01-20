@@ -22,6 +22,12 @@ namespace FarmAPI.Models
         [BsonElement("quantitySupplied")]
         public double QuantitySupplied { get; set; }
 
+        [BsonElement("invoiceNumber")]
+        public string InvoiceNumber { get; set; }
+
+        [BsonElement("supplier")]
+        public string Supplier { get; set; }
+
         [BsonElement("suppliedDate")]
         public DateTime SuppliedDate { get; set; }
 

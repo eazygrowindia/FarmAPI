@@ -10,5 +10,7 @@ namespace FarmAPI.Models
         public required string DiseaseControlName { get; set; }
         public double QuantitySupplied { get; set; }
         public DateTime SuppliedDate { get; set; }
+        public required string Supplier { get; set; }
+        public required string InvoiceNumber { get; set; }
     }
 }

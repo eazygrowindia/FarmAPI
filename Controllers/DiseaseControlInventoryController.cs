@@ -74,12 +74,13 @@ namespace FarmAPI.Controllers
                 FarmId = newDiseaseControlInventoryDto.FarmId,
                 QuantitySupplied = newDiseaseControlInventoryDto.QuantitySupplied,
                 SuppliedDate = newDiseaseControlInventoryDto.SuppliedDate.ToUniversalTime(),
+                InvoiceNumber = newDiseaseControlInventoryDto.InvoiceNumber,
+                Supplier = newDiseaseControlInventoryDto.Supplier,
                 CreatedBy = actor,
                 UpdatedBy = actor
             };
 
             var existingDiseaseControlInventory = await _diseaseControlInventoryService.GetByInventoryIdAsync(newDiseaseControlInventory.InventoryId);
-            var existingFertilizerInventoryForFarm = await _diseaseControlInventoryService.GetByFarmIdDiseaseControlNameAsync(newDiseaseControlInventory.FarmId, newDiseaseControlInventory.DiseaseControlName);
             if (existingDiseaseControlInventory != null)
             {
                 var problem = new ProblemDetails
@@ -88,18 +89,6 @@ namespace FarmAPI.Controllers
                     Detail = $"A diseaseControlInventory with the same inventoryId already exists.",
                     Status = StatusCodes.Status400BadRequest,
                     Instance = HttpContext.Request.Path                 
-                };
-                return BadRequest(problem);
-            }
-
-            if (existingFertilizerInventoryForFarm != null)
-            {
-                var problem = new ProblemDetails
-                {
-                    Title = "Item already exists",
-                    Detail = $"A diseaseControlInventory for the farm with the same diseaseControl already exists.",
-                    Status = StatusCodes.Status400BadRequest,
-                    Instance = HttpContext.Request.Path
                 };
                 return BadRequest(problem);
             }
