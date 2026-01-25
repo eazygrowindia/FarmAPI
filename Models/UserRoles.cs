@@ -5,7 +5,9 @@
         FARMOWNER = 0,
         FARMHELP = 1,
         EASYGROWADMIN = 2,
-        UNKNOWN = 3,
+        AGRONOMIST = 3,
+        TRANSCRIBER = 4,
+        UNKNOWN = 99,
     }
 
     public enum SystemStatus
