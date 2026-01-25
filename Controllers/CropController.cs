@@ -82,12 +82,12 @@ namespace FarmAPI.Controllers
 
             //Check based on farmId has to be included so that no two crops of a farm can have same master crop Ids
             var existingCropWithCropMaster = await _cropService.GetByFarmAndCropMasterAsync(newCrop.FarmId, newCrop.CropMasterId);
-            if (existingCrop != null)
+            if (existingCropWithCropMaster != null)
             {
                 var problem = new ProblemDetails
                 {
                     Title = "Item already exists",
-                    Detail = $"A crop with CropId '{newCrop.CropId}' already exists.",
+                    Detail = $"The crop already exists.",
                     Status = StatusCodes.Status400BadRequest,
                     Instance = HttpContext.Request.Path
                 };
