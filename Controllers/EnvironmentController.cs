@@ -13,5 +13,11 @@ namespace FarmAPI.Controllers
         {
             return Ok(new { Environment = env.EnvironmentName, IsProduction = env.IsProduction() });
         }
+
+        [HttpGet("settings")]
+        public IActionResult GetSettings(IConfiguration config)
+        {
+            return Ok(new { Config = config.AsEnumerable().ToList()});
+        }
     }
 }
