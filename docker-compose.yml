@@ -26,6 +26,7 @@ services:
       - Fido2__Origin="https://yourdomain.com"
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - SettingsSource=docker-compose.yml
       - AllowedHosts=*
     volumes:
       - farmapi_files:/app/files
