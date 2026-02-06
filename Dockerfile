@@ -16,6 +16,6 @@ RUN dotnet publish "FarmAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:U
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-EXPOSE 80
+EXPOSE 3001
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "FarmAPI.dll"]
