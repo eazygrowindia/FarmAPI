@@ -218,7 +218,6 @@ namespace FarmAPI
             {
                 app.UseHsts();
             }
-
             
             app.UseSession();
             app.UseCors("AllowAngularApp");
