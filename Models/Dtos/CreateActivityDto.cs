@@ -11,5 +11,6 @@ namespace FarmAPI.Models.Dtos
         public string CropId { get; set; }
         public string ActivityType { get; set; }
         public string Message { get; set; }
+        public string? Photo { get; set; }
     }
 }

@@ -22,6 +22,9 @@ namespace FarmAPI.Models
         [BsonElement("message")]
         public required string Message { get; set; }
 
+        [BsonElement("imageUrl")]
+        public string? ImageUrl { get; set; }
+
         [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

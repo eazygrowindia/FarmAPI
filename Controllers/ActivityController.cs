@@ -60,6 +60,7 @@ namespace FarmAPI.Controllers
                 CropId = newActivityDto.CropId,
                 ActivityType = newActivityDto.ActivityType,
                 Message = newActivityDto.Message,
+                ImageUrl = newActivityDto.Photo
             };
 
             var existingActivity = await _activityService.GetByActivityIdAsync(newActivity.ActivityId);
