@@ -54,7 +54,13 @@ namespace FarmAPI.Models
 
     public class OwnerPartial
     {
+        [BsonElement("ownerId")]
         public string OwnerId { get; set; }
+
+        [BsonElement("name")]
         public string OwnerName { get; set; } = null!;
+        // helper for response mapping
+        public string Id => OwnerId;
+        public string Name => OwnerName;
     }
 }

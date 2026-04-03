@@ -85,7 +85,13 @@ namespace FarmAPI.Models
 
     public class MaintainerPartial
     {
+        [BsonElement("maintainerId")]
         public string MaintainerId { get; set; }
+        
+        [BsonElement("name")]
         public string MaintainerName { get; set; }
+
+        public string Id => MaintainerId;
+        public string Name => MaintainerName;
     }
 }

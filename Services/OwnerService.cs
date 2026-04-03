@@ -34,6 +34,23 @@ namespace FarmAPI.Services
         public async Task<Owner?> GetAsyncByMobile(string mobile) =>
             await _ownerCollection.Find(x => x.ContactNumber.ToLower() == mobile.ToLower()).FirstOrDefaultAsync();
 
+        public async Task<List<OwnerPartial>> SearchOwnersAsync(string searchTerm)
+        {
+            var projection = Builders<Owner>.Projection
+                .Include(o => o.OwnerId)
+                .Include(o => o.OwnerName)
+                .Exclude("_id");
+
+            var filter = Builders<Owner>.Filter.Or(
+                Builders<Owner>.Filter.Regex(x => x.OwnerId, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
+                Builders<Owner>.Filter.Regex(x => x.OwnerName, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
+                Builders<Owner>.Filter.Regex(x => x.ContactNumber, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"))
+            );
+
+            var owners = await _ownerCollection.Find(filter).Project<OwnerPartial>(projection).ToListAsync();
+            return owners;
+        }
+
         public async Task CreateAsync(Owner newOwner) =>
             await _ownerCollection.InsertOneAsync(newOwner);
 

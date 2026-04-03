@@ -3,6 +3,8 @@ using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FarmAPI.Controllers
 {
@@ -41,6 +43,29 @@ namespace FarmAPI.Controllers
         public async Task<List<OwnerPartial>> GetAllFarmOwnersNames() { 
             var owners = await _ownerService.GetAllFarmOwnersNameAsync();
             return owners;
+        }
+
+        [HttpGet("searchEntity")]
+        public async Task<ActionResult<ApiResponse<SearchItem>>> Search([FromQuery] string searchTerm)
+        {
+            if (string.IsNullOrEmpty(searchTerm?.Trim()) || searchTerm.Trim().Length < 2)
+                return BadRequest(new ApiResponse<SearchItem> { Success = false, Data = new List<SearchItem>(), Message = "Search term must be at least 2 characters" });
+
+            var owners = await _ownerService.SearchOwnersAsync(searchTerm.Trim());
+
+            var response = new ApiResponse<SearchItem>();
+            if (owners == null || owners.Count == 0)
+            {
+                response.Success = false;
+                response.Message = "No data found";
+                response.Data = new List<SearchItem>();
+                return Ok(response);
+            }
+
+            response.Success = true;
+            response.Message = "Search successful";
+            response.Data = owners.Select(o => new SearchItem { Id = o.OwnerId, Name = o.OwnerName }).ToList();
+            return Ok(response);
         }
 
         [HttpPost]

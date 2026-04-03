@@ -33,6 +33,23 @@ namespace FarmAPI.Services
         public async Task<Maintainer?> GetAsyncByMobile(string mobile) =>
             await _maintainerCollection.Find(x => x.ContactNumber.ToLower() == mobile.ToLower()).FirstOrDefaultAsync();
 
+        public async Task<List<MaintainerPartial>> SearchMaintainersAsync(string searchTerm)
+        {
+            var projection = Builders<Maintainer>.Projection
+                .Include(m => m.MaintainerId)
+                .Include(m => m.MaintainerName)
+                .Exclude("_id");
+
+            var filter = Builders<Maintainer>.Filter.Or(
+                Builders<Maintainer>.Filter.Regex(x => x.MaintainerId, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
+                Builders<Maintainer>.Filter.Regex(x => x.MaintainerName, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i")),
+                Builders<Maintainer>.Filter.Regex(x => x.ContactNumber, new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"))
+            );
+
+            var maintainers = await _maintainerCollection.Find(filter).Project<MaintainerPartial>(projection).ToListAsync();
+            return maintainers;
+        }
+
         public async Task CreateAsync(Maintainer newMaintainer) =>
             await _maintainerCollection.InsertOneAsync(newMaintainer);
 

@@ -218,6 +218,23 @@ namespace FarmAPI.Services
             return await _farmCollection.Find(filter).ToListAsync();
         }
 
+        public async Task<List<FarmPartial>> SearchFarmsAsync(string searchTerm)
+        {
+            var projection = Builders<Farm>.Projection
+                .Include(f => f.FarmId)
+                .Include(f => f.FarmName)
+                .Include(f => f.ShadeNetArea)
+                .Exclude("_id");
+
+            var filter = Builders<Farm>.Filter.Or(
+                Builders<Farm>.Filter.Regex(x => x.FarmId, new BsonRegularExpression(searchTerm, "i")),
+                Builders<Farm>.Filter.Regex(x => x.FarmName, new BsonRegularExpression(searchTerm, "i"))
+            );
+
+            var farms = await _farmCollection.Find(filter).Project<FarmPartial>(projection).ToListAsync();
+            return farms;
+        }
+
         public async Task CreateAsync(Farm newFarm) => 
             await _farmCollection.InsertOneAsync(newFarm);
 

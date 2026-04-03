@@ -24,6 +24,29 @@ namespace FarmAPI.Controllers
         public async Task<List<Maintainer>> Get() =>
             await _maintainerService.GetAsync();
 
+        [HttpGet("searchEntity")]
+        public async Task<ActionResult<ApiResponse<SearchItem>>> Search([FromQuery] string searchTerm)
+        {
+            if (string.IsNullOrEmpty(searchTerm?.Trim()) || searchTerm.Trim().Length < 2)
+                return BadRequest(new ApiResponse<SearchItem> { Success = false, Data = new List<SearchItem>(), Message = "Search term must be at least 2 characters" });
+
+            var maintainers = await _maintainerService.SearchMaintainersAsync(searchTerm.Trim());
+
+            var response = new ApiResponse<SearchItem>();
+            if (maintainers == null || maintainers.Count == 0)
+            {
+                response.Success = false;
+                response.Message = "No data found";
+                response.Data = new List<SearchItem>();
+                return Ok(response);
+            }
+
+            response.Success = true;
+            response.Message = "Search successful";
+            response.Data = maintainers.Select(m => new SearchItem { Id = m.MaintainerId, Name = m.MaintainerName }).ToList();
+            return Ok(response);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Maintainer>> Get(string id)
         {
