@@ -19,6 +19,12 @@ namespace FarmAPI.Models
         [BsonElement("type")]
         public required string ActivityType { get; set; }
 
+        [BsonElement("productName")]
+        public string? ProductName { get; set; }
+
+        [BsonElement("quantity")]
+        public double? Quantity { get; set; }
+
         [BsonElement("message")]
         public required string Message { get; set; }
 

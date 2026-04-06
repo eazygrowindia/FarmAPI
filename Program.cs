@@ -52,6 +52,7 @@ namespace FarmAPI
             builder.Services.AddScoped<ObservationService>();
             builder.Services.AddScoped<CropMasterService>();
             builder.Services.AddScoped<FertilizerInventoryService>();
+            builder.Services.AddScoped<FertilizerInventoryItemService>();
             builder.Services.AddScoped<DiseaseControlInventoryService>();
 
             builder.Services.AddScoped<UserRepository>();

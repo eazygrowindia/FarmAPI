@@ -16,6 +16,7 @@
         public string ObservationCollectionName { get; set; } = null!;
         public string CropMasterCollectionName { get;set; } = null!;
         public string FertilizerInventoryCollectionName { get; set; } = null!;
+        public string FertilizerInventoryItemCollectionName { get; set; } = null!;
         public string DiseaseControlInventoryCollectionName { get; set; } = null!;
     }
 }

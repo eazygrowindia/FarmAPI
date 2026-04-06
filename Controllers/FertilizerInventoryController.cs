@@ -14,21 +14,52 @@ namespace FarmAPI.Controllers
     public class FertilizerInventoryController : ControllerBase
     {
         private readonly FertilizerInventoryService _fertilizerInventoryService;
+        private readonly FertilizerInventoryItemService _fertilizerInventoryItemService;
 
-        public FertilizerInventoryController(FertilizerInventoryService fertilizerInventoryService) =>
+        public FertilizerInventoryController(FertilizerInventoryService fertilizerInventoryService
+            , FertilizerInventoryItemService fertilizerInventoryItemService)
+        {
             _fertilizerInventoryService = fertilizerInventoryService;
+            _fertilizerInventoryItemService = fertilizerInventoryItemService;
+        }
 
         [HttpGet("GetAll")]
         public async Task<List<FertilizerInventory>> Get() =>
             await _fertilizerInventoryService.GetAsync();
 
         [HttpGet("GetAllFarmInventory/{farmId}")]
-        public async Task<ActionResult<List<FertilizerInventory>>> GetAllFarmInventoryAsync(string farmId)
+        public async Task<ActionResult<ApiResponse<FertilizerInventoryResponse>>> GetAllFarmInventoryAsync(string farmId)
         {
             if (string.IsNullOrEmpty(farmId))
                 return BadRequest();
 
-            return await _fertilizerInventoryService.GetAllFarmInventoryAsync(farmId);
+            ApiResponse<FertilizerInventoryResponse> response = new ApiResponse<FertilizerInventoryResponse>();
+            var farmInventories = await _fertilizerInventoryService.GetAllFarmInventoryAsync(farmId);
+
+            if (farmInventories == null || farmInventories.Count == 0)
+            {
+                response.Success = false;
+                response.Message = "No data found";
+                response.Data = new List<FertilizerInventoryResponse>();
+                return Ok(response);
+            }
+
+            foreach (var inventory in farmInventories)
+            {
+                var inventoryItems = await _fertilizerInventoryItemService.GetByInventoryIdAsync(inventory.InventoryId);
+                response.Data.Add(new FertilizerInventoryResponse
+                {
+                    FarmId = inventory.FarmId,
+                    InventoryId = inventory.InventoryId,
+                    SuppliedDate = inventory.SuppliedDate,
+                    Supplier = inventory.Supplier,
+                    InvoiceNumber = inventory.InvoiceNumber,
+                    FertilizerItems = inventoryItems
+                });
+            }
+            response.Success = true;
+            response.Message = "Get successful";
+            return Ok(response);
         }
 
         [HttpGet("GetFertilizerInventoryById/{id}")]
@@ -67,12 +98,11 @@ namespace FarmAPI.Controllers
             if(string.IsNullOrEmpty(actor))
                 return UnprocessableEntity();
 
+            //start - create fertilizer inventory document
             var newFertilizerInventory = new FertilizerInventory
             {
                 InventoryId = Guid.NewGuid().ToString(),
-                FertilizerName = newFertilizerInventoryDto.FertilizerName,
                 FarmId = newFertilizerInventoryDto.FarmId,
-                QuantitySupplied = newFertilizerInventoryDto.QuantitySupplied,
                 SuppliedDate = newFertilizerInventoryDto.SuppliedDate.ToUniversalTime(),
                 InvoiceNumber = newFertilizerInventoryDto.InvoiceNumber,
                 Supplier = newFertilizerInventoryDto.Supplier,
@@ -94,6 +124,26 @@ namespace FarmAPI.Controllers
             }
 
             await _fertilizerInventoryService.CreateAsync(newFertilizerInventory);
+            //end - create fertilizer inventory document
+
+            //start - create fertilizer inventory items document
+            var newFertilizerInventoryItems = newFertilizerInventoryDto.FertilizerItems.Select(item => new FertilizerInventoryItem
+            {
+                InventoryItemId = Guid.NewGuid().ToString(),
+                InventoryId = newFertilizerInventory.InventoryId,
+                FertilizerName = item.FertilizerName,
+                QuantitySupplied = item.QuantitySupplied,
+                QuantityMetric = item.QuantityMetric,
+                CreatedBy = actor,
+                UpdatedBy = actor
+            }).ToList();
+
+            await _fertilizerInventoryItemService.CreateManyAsync(newFertilizerInventoryItems);
+            //foreach (var item in newFertilizerInventoryItems)
+            //{
+            //    await _fertilizerInventoryItemService.CreateAsync(item);
+            //}
+
             return CreatedAtAction(nameof(Get), new { id = newFertilizerInventory.Id }, newFertilizerInventory);
         }
 
@@ -108,6 +158,8 @@ namespace FarmAPI.Controllers
             }
 
             await _fertilizerInventoryService.RemoveAsync(inventoryId);
+
+            await _fertilizerInventoryItemService.RemoveAsync(inventoryId);
 
             return NoContent();
         }

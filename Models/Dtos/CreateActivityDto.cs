@@ -10,6 +10,8 @@ namespace FarmAPI.Models.Dtos
         public string ActivityId { get; set; }
         public string CropId { get; set; }
         public string ActivityType { get; set; }
+        public string? ProductName { get; set; }
+        public double? Quantity { get; set; }
         public string Message { get; set; }
         public string? Photo { get; set; }
     }

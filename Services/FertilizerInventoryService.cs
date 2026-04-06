@@ -26,9 +26,6 @@ namespace FarmAPI.Services
         public async Task<FertilizerInventory?> GetByInventoryIdAsync(string inventoryId) =>
             await _fertilizerInventoryCollection.Find(x => x.InventoryId == inventoryId).FirstOrDefaultAsync();
 
-        public async Task<FertilizerInventory?> GetByFarmIdFertilizerNameAsync(string farmId, string fertilizerName) =>
-            await _fertilizerInventoryCollection.Find(x => x.FarmId == farmId && x.FertilizerName == fertilizerName).FirstOrDefaultAsync();
-
         public async Task CreateAsync(FertilizerInventory newFertilizerInventory) => 
             await _fertilizerInventoryCollection.InsertOneAsync(newFertilizerInventory);
 
@@ -40,11 +37,7 @@ namespace FarmAPI.Services
 
             await _fertilizerInventoryCollection.UpdateOneAsync(filter,
                 Builders<FertilizerInventory>.Update
-                    .Set(c => c.FertilizerName, updatedFertilizerInventory.FertilizerName)
-                    .Set(c => c.QuantitySupplied, updatedFertilizerInventory.QuantitySupplied)
                     .Set(c => c.SuppliedDate, updatedFertilizerInventory.SuppliedDate)
-                    .Set(c => c.QuantityUsed, updatedFertilizerInventory.QuantityUsed)
-                    .Set(c => c.UsedDate, updatedFertilizerInventory.UsedDate)
                     .Set(c => c.UpdatedBy, updatedFertilizerInventory.UpdatedBy)
                     .Set(c => c.UpdatedAt, DateTime.UtcNow)
             );

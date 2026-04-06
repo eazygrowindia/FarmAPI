@@ -4,7 +4,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace FarmAPI.Models
 {
-    public class FertilizerInventory
+    public class FertilizerInventoryItem
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -13,17 +13,23 @@ namespace FarmAPI.Models
         [BsonElement("inventoryId")]
         public required string InventoryId { get; set; }
 
-        [BsonElement("farmId")]
-        public required string FarmId { get; set; }
+        [BsonElement("inventoryItemId")]
+        public required string InventoryItemId { get; set; }
 
-        [BsonElement("invoiceNumber")]
-        public string InvoiceNumber { get; set; }
+        [BsonElement("fertilizerName")]
+        public required string FertilizerName { get; set; }
 
-        [BsonElement("supplier")]
-        public string Supplier { get; set; }
+        [BsonElement("quantitySupplied")]
+        public double QuantitySupplied { get; set; }
 
-        [BsonElement("suppliedDate")]
-        public DateTime SuppliedDate { get; set; }
+        [BsonElement("quantityMetric")]
+        public string QuantityMetric { get; set; }
+
+        [BsonElement("quantityUsed")]
+        public double QuantityUsed { get; set; }
+
+        [BsonElement("usedDate")]
+        public DateTime UsedDate { get; set; }
 
         /// <summary>
         /// References UserId from user collection
