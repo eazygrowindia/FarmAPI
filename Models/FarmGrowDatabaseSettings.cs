@@ -18,5 +18,6 @@
         public string FertilizerInventoryCollectionName { get; set; } = null!;
         public string FertilizerInventoryItemCollectionName { get; set; } = null!;
         public string DiseaseControlInventoryCollectionName { get; set; } = null!;
+        public string DiseaseControlInventoryItemCollectionName { get; set; } = null!;
     }
 }

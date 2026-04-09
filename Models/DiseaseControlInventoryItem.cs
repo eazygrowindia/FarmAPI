@@ -1,10 +1,10 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace FarmAPI.Models
 {
-    public class DiseaseControlInventory
+    public class DiseaseControlInventoryItem
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -13,17 +13,23 @@ namespace FarmAPI.Models
         [BsonElement("inventoryId")]
         public required string InventoryId { get; set; }
 
-        [BsonElement("farmId")]
-        public required string FarmId { get; set; }
+        [BsonElement("inventoryItemId")]
+        public required string InventoryItemId { get; set; }
 
-        [BsonElement("invoiceNumber")]
-        public string InvoiceNumber { get; set; }
+        [BsonElement("diseaseControlName")]
+        public required string DiseaseControlName { get; set; }
 
-        [BsonElement("supplier")]
-        public string Supplier { get; set; }
+        [BsonElement("quantitySupplied")]
+        public double QuantitySupplied { get; set; }
 
-        [BsonElement("suppliedDate")]
-        public DateTime SuppliedDate { get; set; }
+        [BsonElement("quantityMetric")]
+        public string QuantityMetric { get; set; }
+
+        [BsonElement("quantityUsed")]
+        public double QuantityUsed { get; set; }
+
+        [BsonElement("usedDate")]
+        public DateTime UsedDate { get; set; }
 
         /// <summary>
         /// References UserId from user collection

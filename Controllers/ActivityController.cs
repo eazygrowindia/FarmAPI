@@ -17,14 +17,19 @@ namespace FarmAPI.Controllers
         private readonly CropService _cropService;
         private readonly FertilizerInventoryService _fertilizerInventoryService;
         private readonly FertilizerInventoryItemService _fertilizerInventoryItemService;
+        private readonly DiseaseControlInventoryService _diseaseControlInventoryService;
+        private readonly DiseaseControlInventoryItemService _diseaseControlInventoryItemService;
 
         public ActivityController(ActivityService activityService, CropService cropService
-            , FertilizerInventoryService fertilizerInventoryService, FertilizerInventoryItemService fertilizerInventoryItemService)
+            , FertilizerInventoryService fertilizerInventoryService, FertilizerInventoryItemService fertilizerInventoryItemService
+            , DiseaseControlInventoryService diseaseControlInventoryService, DiseaseControlInventoryItemService diseaseControlInventoryItemService)
         {
             _activityService = activityService;
             _cropService = cropService;
             _fertilizerInventoryService = fertilizerInventoryService;
             _fertilizerInventoryItemService = fertilizerInventoryItemService;
+            _diseaseControlInventoryItemService = diseaseControlInventoryItemService;
+             _diseaseControlInventoryService = diseaseControlInventoryService;
         }
 
         [HttpGet]
@@ -94,35 +99,99 @@ namespace FarmAPI.Controllers
 
             await _activityService.CreateAsync(newActivity);
 
-            // if ProductName is provided, try to find it in fertilizer inventory and update the quantity used accordingly
+            // if ProductName is provided, try to find it in inventory and update the quantity used accordingly
             if (!string.IsNullOrEmpty(newActivity.ProductName))
             {
-                //check if it is in fertilizerInventoyItem, older item first & greater than 0 quantity, then update it
                 var farmId = _cropService.GetByCropIdAsync(newActivity.CropId).Result.FarmId;
                 if (!string.IsNullOrEmpty(farmId)) 
                 {
-                    var farmInventories = await _fertilizerInventoryService.GetAllFarmInventoryAsync(farmId);
-                    var inventoryIds = farmInventories.Select(f => f.InventoryId).ToList();
-                    var farmInventoryItems = await _fertilizerInventoryItemService.GetByMultipleInventoryIdFertilizerNameAsync(inventoryIds, newActivity.ProductName);
-                    //sort by ascending/earliest first
-                    var orderredProductItems = farmInventoryItems.OrderBy(x => x.CreatedAt).ToList();
-                    foreach (var productItem in orderredProductItems) {
-                        productItem.UpdatedBy = actor;
-                        double availableQuantity = productItem.QuantitySupplied - productItem.QuantityUsed;
-                        if(availableQuantity > 0)
+                    // Check fertilizer inventory first
+                    var fertilizerInventories = await _fertilizerInventoryService.GetAllFarmInventoryAsync(farmId);
+                    var fertilizerInventoryIds = fertilizerInventories.Select(f => f.InventoryId).ToList();
+                    var fertilizerItems = await _fertilizerInventoryItemService.GetByMultipleInventoryIdFertilizerNameAsync(fertilizerInventoryIds, newActivity.ProductName);
+
+                    // Check disease control inventory
+                    var diseaseControlInventories = await _diseaseControlInventoryService.GetAllFarmInventoryAsync(farmId);
+                    var diseaseControlInventoryIds = diseaseControlInventories.Select(f => f.InventoryId).ToList();
+                    var diseaseControlItems = await _diseaseControlInventoryItemService.GetByMultipleInventoryIdDiseaseControlNameAsync(diseaseControlInventoryIds, newActivity.ProductName);
+
+                    // Combine both lists and sort by ascending/earliest first
+                    var allProductItems = new List<dynamic>();
+
+                    var fertilizerItemsForProcessing = from items in fertilizerItems
+                                join inventories in fertilizerInventories on items.InventoryId equals inventories.InventoryId into inventoryItems
+                                from inventoryItem in inventoryItems.DefaultIfEmpty()
+                                select new
+                                {
+                                    Item = (object)items,
+                                    Type = "fertilizer",
+                                    SuppliedDate = inventoryItem?.SuppliedDate
+                                };
+
+                    var diseaseControlItemsForProcessing = from items in diseaseControlItems
+                                join inventories in diseaseControlInventories on items.InventoryId equals inventories.InventoryId into inventoryItems
+                                from inventoryItem in inventoryItems.DefaultIfEmpty()
+                                select new
+                                {
+                                    Item = (object)items,
+                                    Type = "diseaseControl",
+                                    SuppliedDate = inventoryItem?.SuppliedDate
+                                };
+
+
+                    allProductItems.AddRange(fertilizerItemsForProcessing);
+                    allProductItems.AddRange(diseaseControlItemsForProcessing);
+
+                    var orderedProductItems = allProductItems
+                        .OrderBy(x => x.SuppliedDate)
+                        .ToList();
+
+                    foreach (var productWrapper in orderedProductItems)
+                    {
+                        if (productWrapper.Type == "fertilizer")
                         {
-                            if (availableQuantity >= newActivity.Quantity)
+                            var fertilizerItem = (FertilizerInventoryItem)productWrapper.Item;
+                            fertilizerItem.UpdatedBy = actor;
+                            double availableQuantity = fertilizerItem.QuantitySupplied - fertilizerItem.QuantityUsed;
+
+                            if (availableQuantity > 0)
                             {
-                                productItem.QuantityUsed += newActivity.Quantity.Value;
-                                await _fertilizerInventoryItemService.ConsumeQuantityAsync(productItem.InventoryItemId, productItem);
-                                break; // done updating, exit loop
+                                if (availableQuantity >= newActivity.Quantity)
+                                {
+                                    fertilizerItem.QuantityUsed += newActivity.Quantity.Value;
+                                    await _fertilizerInventoryItemService.ConsumeQuantityAsync(fertilizerItem.InventoryItemId, fertilizerItem);
+                                    break; // done updating, exit loop
+                                }
+                                else
+                                {
+                                    // use up the remaining available quantity and continue to next item
+                                    fertilizerItem.QuantityUsed += availableQuantity;
+                                    newActivity.Quantity -= availableQuantity;
+                                    await _fertilizerInventoryItemService.ConsumeQuantityAsync(fertilizerItem.InventoryItemId, fertilizerItem);
+                                }
                             }
-                            else
+                        }
+                        else if (productWrapper.Type == "diseaseControl")
+                        {
+                            var diseaseControlItem = (DiseaseControlInventoryItem)productWrapper.Item;
+                            diseaseControlItem.UpdatedBy = actor;
+                            double availableQuantity = diseaseControlItem.QuantitySupplied - diseaseControlItem.QuantityUsed;
+
+                            if (availableQuantity > 0)
                             {
-                                // use up the remaining available quantity and continue to next item
-                                productItem.QuantityUsed += availableQuantity;
-                                newActivity.Quantity -= availableQuantity; // reduce the remaining quantity needed
-                                await _fertilizerInventoryItemService.ConsumeQuantityAsync(productItem.InventoryItemId, productItem);
+                                if (availableQuantity >= newActivity.Quantity)
+                                {
+                                    diseaseControlItem.QuantityUsed += newActivity.Quantity.Value;
+                                    await _diseaseControlInventoryItemService.ConsumeQuantityAsync(diseaseControlItem.InventoryItemId, diseaseControlItem);
+                                    break; // done updating, exit loop
+                                }
+                                else
+                                {
+                                    // use up the remaining available quantity and continue to next item
+                                    diseaseControlItem.QuantityUsed += availableQuantity;
+                                    newActivity.Quantity -= availableQuantity;
+                                    await _diseaseControlInventoryItemService.ConsumeQuantityAsync(diseaseControlItem.InventoryItemId, diseaseControlItem);
+                                }
                             }
                         }
                     }

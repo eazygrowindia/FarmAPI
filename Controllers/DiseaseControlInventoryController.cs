@@ -14,21 +14,52 @@ namespace FarmAPI.Controllers
     public class DiseaseControlInventoryController : ControllerBase
     {
         private readonly DiseaseControlInventoryService _diseaseControlInventoryService;
+        private readonly DiseaseControlInventoryItemService _diseaseControlInventoryItemService;
 
-        public DiseaseControlInventoryController(DiseaseControlInventoryService diseaseControlInventoryService) =>
+        public DiseaseControlInventoryController(DiseaseControlInventoryService diseaseControlInventoryService
+            , DiseaseControlInventoryItemService diseaseControlInventoryItemService)
+        {
             _diseaseControlInventoryService = diseaseControlInventoryService;
+            _diseaseControlInventoryItemService = diseaseControlInventoryItemService;
+        }
 
         [HttpGet("GetAll")]
         public async Task<List<DiseaseControlInventory>> Get() =>
             await _diseaseControlInventoryService.GetAsync();
 
         [HttpGet("GetAllFarmInventory/{farmId}")]
-        public async Task<ActionResult<List<DiseaseControlInventory>>> GetAllFarmInventoryAsync(string farmId)
+        public async Task<ActionResult<ApiResponse<DiseaseControlInventoryResponse>>> GetAllFarmInventoryAsync(string farmId)
         {
             if (string.IsNullOrEmpty(farmId))
                 return BadRequest();
 
-            return await _diseaseControlInventoryService.GetAllFarmInventoryAsync(farmId);
+            ApiResponse<DiseaseControlInventoryResponse> response = new ApiResponse<DiseaseControlInventoryResponse>();
+            var farmInventories = await _diseaseControlInventoryService.GetAllFarmInventoryAsync(farmId);
+
+            if (farmInventories == null || farmInventories.Count == 0)
+            {
+                response.Success = false;
+                response.Message = "No data found";
+                response.Data = new List<DiseaseControlInventoryResponse>();
+                return Ok(response);
+            }
+
+            foreach (var inventory in farmInventories)
+            {
+                var inventoryItems = await _diseaseControlInventoryItemService.GetByInventoryIdAsync(inventory.InventoryId);
+                response.Data.Add(new DiseaseControlInventoryResponse
+                {
+                    FarmId = inventory.FarmId,
+                    InventoryId = inventory.InventoryId,
+                    SuppliedDate = inventory.SuppliedDate,
+                    Supplier = inventory.Supplier,
+                    InvoiceNumber = inventory.InvoiceNumber,
+                    DiseaseControlItems = inventoryItems
+                });
+            }
+            response.Success = true;
+            response.Message = "Get successful";
+            return Ok(response);
         }
 
         [HttpGet("GetDiseaseControlInventoryById/{id}")]
@@ -67,12 +98,11 @@ namespace FarmAPI.Controllers
             if(string.IsNullOrEmpty(actor))
                 return UnprocessableEntity();
 
+            //start - create disease control inventory document
             var newDiseaseControlInventory = new DiseaseControlInventory
             {
                 InventoryId = Guid.NewGuid().ToString(),
-                DiseaseControlName = newDiseaseControlInventoryDto.DiseaseControlName,
                 FarmId = newDiseaseControlInventoryDto.FarmId,
-                QuantitySupplied = newDiseaseControlInventoryDto.QuantitySupplied,
                 SuppliedDate = newDiseaseControlInventoryDto.SuppliedDate.ToUniversalTime(),
                 InvoiceNumber = newDiseaseControlInventoryDto.InvoiceNumber,
                 Supplier = newDiseaseControlInventoryDto.Supplier,
@@ -94,6 +124,23 @@ namespace FarmAPI.Controllers
             }
 
             await _diseaseControlInventoryService.CreateAsync(newDiseaseControlInventory);
+            //end - create disease control inventory document
+
+            //start - create disease control inventory items document
+            var newDiseaseControlInventoryItems = newDiseaseControlInventoryDto.DiseaseControlItems.Select(item => new DiseaseControlInventoryItem
+            {
+                InventoryItemId = Guid.NewGuid().ToString(),
+                InventoryId = newDiseaseControlInventory.InventoryId,
+                DiseaseControlName = item.DiseaseControlName,
+                QuantitySupplied = item.QuantitySupplied,
+                QuantityMetric = item.QuantityMetric,
+                CreatedBy = actor,
+                UpdatedBy = actor
+            }).ToList();
+
+            await _diseaseControlInventoryItemService.CreateManyAsync(newDiseaseControlInventoryItems);
+            //end - create disease control inventory items document
+
             return CreatedAtAction(nameof(Get), new { id = newDiseaseControlInventory.Id }, newDiseaseControlInventory);
         }
 
@@ -108,6 +155,8 @@ namespace FarmAPI.Controllers
             }
 
             await _diseaseControlInventoryService.RemoveAsync(inventoryId);
+
+            await _diseaseControlInventoryItemService.RemoveAsync(inventoryId);
 
             return NoContent();
         }
