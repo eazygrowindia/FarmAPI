@@ -81,7 +81,8 @@ namespace FarmAPI.Controllers
                 AlternateContactNumber = newOwnerDto.AlternateContactNumber,
                 Address = newOwnerDto.Address,
                 EmailId = newOwnerDto.EmailId,
-                HealthChecks = newOwnerDto.HealthChecks,
+                HealthChecks = !string.IsNullOrEmpty(newOwnerDto.HealthChecks[0].HealthReportUrl) 
+                ? newOwnerDto.HealthChecks : new List<HealthCheck>(),
                 SystemStatus = "Active"
             };
 

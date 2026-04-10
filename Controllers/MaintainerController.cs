@@ -75,7 +75,8 @@ namespace FarmAPI.Controllers
                 IdentityProofDocument = newMaintainerDto.IdentityProofDocument,
                 IdentityProofNumber = newMaintainerDto.IdentityProofNumber,
                 FarmOwnerId = newMaintainerDto.FarmOwnerId,
-                HealthChecks = newMaintainerDto.HealthChecks,
+                HealthChecks = !string.IsNullOrEmpty(newMaintainerDto.HealthChecks[0].HealthReportUrl)
+                ? newMaintainerDto.HealthChecks : new List<HealthCheck>(),
                 SystemStatus = "Active"
             };
 
