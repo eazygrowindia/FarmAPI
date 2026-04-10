@@ -81,8 +81,7 @@ namespace FarmAPI.Controllers
                 AlternateContactNumber = newOwnerDto.AlternateContactNumber,
                 Address = newOwnerDto.Address,
                 EmailId = newOwnerDto.EmailId,
-                //FarmsOwned = newOwnerDto.FarmsOwned,
-                //Maintainers = newOwnerDto.Maintainers,
+                HealthChecks = newOwnerDto.HealthChecks,
                 SystemStatus = "Active"
             };
 

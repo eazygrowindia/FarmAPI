@@ -14,6 +14,7 @@ namespace FarmAPI.Models.Dtos
         public string IdentityProofDocument { get; set; } = null!;
         public string IdentityProofNumber { get; set; } = null!;
         public string TrainingCertificateUrl { get; set; }
+        public List<HealthCheck> HealthChecks { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
     }

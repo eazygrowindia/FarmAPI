@@ -36,6 +36,9 @@ namespace FarmAPI.Models
         [BsonElement("address")]
         public string Address { get; set; } = null!;
 
+        [BsonElement("healthChecks")]
+        public List<HealthCheck> HealthChecks { get; set; }
+
         //[BsonElement("farmsOwned")]
         //public List<string> FarmsOwned { get; set; }
 

@@ -58,6 +58,9 @@ namespace FarmAPI.Models
         [BsonElement("trainingCertificateUrl")]
         public string TrainingCertificateUrl { get; set; }
 
+        [BsonElement("healthChecks")]
+        public List<HealthCheck> HealthChecks { get; set; }
+
         /// <summary>
         /// List of Farm IDs maintained by the maintainer/assitant
         /// </summary>

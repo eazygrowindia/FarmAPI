@@ -75,8 +75,7 @@ namespace FarmAPI.Controllers
                 IdentityProofDocument = newMaintainerDto.IdentityProofDocument,
                 IdentityProofNumber = newMaintainerDto.IdentityProofNumber,
                 FarmOwnerId = newMaintainerDto.FarmOwnerId,
-                //FarmsMaintained = newMaintainerDto.FarmsMaintained,
-                //Role = newMaintainerDto.Role,
+                HealthChecks = newMaintainerDto.HealthChecks,
                 SystemStatus = "Active"
             };
 
