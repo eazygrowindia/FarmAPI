@@ -1,4 +1,4 @@
-﻿using FarmAPI.Models;
+using FarmAPI.Models;
 using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
 using FarmAPI.Utils;
@@ -162,6 +162,48 @@ namespace FarmAPI.Controllers
             await _fertilizerInventoryItemService.RemoveAsync(inventoryId);
 
             return NoContent();
+        }
+
+        [HttpGet("GetInputCatalogNames/{type}")]
+        public async Task<ActionResult<List<string>>> GetInputCatalogNames(string type)
+        {
+            if (string.IsNullOrEmpty(type))
+                return BadRequest("Type parameter is required.");
+
+            var names = await _fertilizerInventoryService.GetInputCatalogNamesAsync(type);
+            return Ok(names);
+        }
+
+        [HttpPost("CreateInputCatalog")]
+        public async Task<IActionResult> CreateInputCatalog([FromBody] CreateInputCatalogDto newCatalogDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(newCatalogDto.Name, newCatalogDto.Type);
+            if (existing != null)
+            {
+                var problem = new ProblemDetails
+                {
+                    Title = "Item already exists",
+                    Detail = $"An input catalog item with name '{newCatalogDto.Name}' and type '{newCatalogDto.Type}' already exists.",
+                    Status = StatusCodes.Status400BadRequest,
+                    Instance = HttpContext.Request.Path                 
+                };
+                return BadRequest(problem);
+            }
+
+            var newCatalog = new InputCatalog
+            {
+                Type = newCatalogDto.Type,
+                Name = newCatalogDto.Name,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _fertilizerInventoryService.CreateInputCatalogAsync(newCatalog);
+            return Ok(newCatalog);
         }
     }
 }
