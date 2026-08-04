@@ -205,5 +205,21 @@ namespace FarmAPI.Controllers
             await _fertilizerInventoryService.CreateInputCatalogAsync(newCatalog);
             return Ok(newCatalog);
         }
+
+        [HttpDelete("RemoveInputCatalog/{type}/{name}")]
+        public async Task<IActionResult> RemoveInputCatalog(string type, string name)
+        {
+            Console.WriteLine($"[DEBUG] RemoveInputCatalog called with type: '{type}', name: '{name}'");
+            if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(name))
+                return BadRequest("Type and name parameters are required.");
+
+            var existing = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(name, type);
+            Console.WriteLine($"[DEBUG] Existing catalog item found: {existing != null}");
+            if (existing == null)
+                return NotFound();
+
+            await _fertilizerInventoryService.RemoveInputCatalogAsync(name, type);
+            return NoContent();
+        }
     }
 }
