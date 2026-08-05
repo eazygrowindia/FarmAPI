@@ -221,5 +221,35 @@ namespace FarmAPI.Controllers
             await _fertilizerInventoryService.RemoveInputCatalogAsync(name, type);
             return NoContent();
         }
+
+        [HttpPut("UpdateInputCatalog")]
+        public async Task<IActionResult> UpdateInputCatalog([FromBody] UpdateInputCatalogDto updateDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(updateDto.OldName, updateDto.Type);
+            if (existing == null)
+                return NotFound("Original item not found.");
+
+            if (updateDto.OldName.ToLower() != updateDto.NewName.ToLower())
+            {
+                var newExisting = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(updateDto.NewName, updateDto.Type);
+                if (newExisting != null)
+                {
+                    var problem = new ProblemDetails
+                    {
+                        Title = "Item already exists",
+                        Detail = $"An input catalog item with name '{updateDto.NewName}' and type '{updateDto.Type}' already exists.",
+                        Status = StatusCodes.Status400BadRequest,
+                        Instance = HttpContext.Request.Path                 
+                    };
+                    return BadRequest(problem);
+                }
+            }
+
+            await _fertilizerInventoryService.UpdateInputCatalogAsync(updateDto.OldName, updateDto.NewName, updateDto.Type);
+            return Ok();
+        }
     }
 }

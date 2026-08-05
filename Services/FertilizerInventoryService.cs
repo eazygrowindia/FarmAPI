@@ -76,5 +76,16 @@ namespace FarmAPI.Services
                 Builders<InputCatalog>.Update.Set(x => x.IsActive, false).Set(x => x.UpdatedAt, DateTime.UtcNow)
             );
         }
+
+        public async Task UpdateInputCatalogAsync(string oldName, string newName, string type)
+        {
+            var trimmedOldName = oldName?.Trim() ?? "";
+            var trimmedNewName = newName?.Trim() ?? "";
+            var trimmedType = type?.Trim() ?? "";
+            await _inputCatalogCollection.UpdateOneAsync(
+                x => x.Name.ToLower() == trimmedOldName.ToLower() && x.Type.ToLower() == trimmedType.ToLower() && x.IsActive,
+                Builders<InputCatalog>.Update.Set(x => x.Name, trimmedNewName).Set(x => x.UpdatedAt, DateTime.UtcNow)
+            );
+        }
     }
 }
