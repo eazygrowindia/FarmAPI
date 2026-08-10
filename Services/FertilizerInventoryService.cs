@@ -1,4 +1,4 @@
-﻿using FarmAPI.Models;
+using FarmAPI.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -8,10 +8,12 @@ namespace FarmAPI.Services
     public class FertilizerInventoryService
     {
         private readonly IMongoCollection<FertilizerInventory> _fertilizerInventoryCollection;
+        private readonly IMongoCollection<InputCatalog> _inputCatalogCollection;
 
         public FertilizerInventoryService(IDatabaseFactory db, IOptions<FarmGrowDatabaseSettings> settings)
         {
             _fertilizerInventoryCollection = db.FarmGrow.GetCollection<FertilizerInventory>(settings.Value.FertilizerInventoryCollectionName);
+            _inputCatalogCollection = db.FarmGrow.GetCollection<InputCatalog>(settings.Value.InputCatalogCollectionName);
         }
 
         public async Task<List<FertilizerInventory>> GetAsync() =>
@@ -45,5 +47,45 @@ namespace FarmAPI.Services
 
         public async Task RemoveAsync(string inventoryId) =>
             await _fertilizerInventoryCollection.DeleteOneAsync(x => x.InventoryId == inventoryId);
+
+        public async Task<List<string>> GetInputCatalogNamesAsync(string type) =>
+            await _inputCatalogCollection
+                .Find(x => x.Type == type && x.IsActive)
+                .Project(x => x.Name)
+                .ToListAsync();
+
+        public async Task<InputCatalog?> GetInputCatalogByNameAndTypeAsync(string name, string type)
+        {
+            var trimmedName = name?.Trim() ?? "";
+            var trimmedType = type?.Trim() ?? "";
+            return await _inputCatalogCollection.Find(x =>
+                x.Name.ToLower() == trimmedName.ToLower() &&
+                x.Type.ToLower() == trimmedType.ToLower()
+            ).FirstOrDefaultAsync();
+        }
+
+        public async Task CreateInputCatalogAsync(InputCatalog newCatalog) =>
+            await _inputCatalogCollection.InsertOneAsync(newCatalog);
+
+        public async Task RemoveInputCatalogAsync(string name, string type)
+        {
+            var trimmedName = name?.Trim() ?? "";
+            var trimmedType = type?.Trim() ?? "";
+            await _inputCatalogCollection.UpdateOneAsync(
+                x => x.Name.ToLower() == trimmedName.ToLower() && x.Type.ToLower() == trimmedType.ToLower(),
+                Builders<InputCatalog>.Update.Set(x => x.IsActive, false).Set(x => x.UpdatedAt, DateTime.UtcNow)
+            );
+        }
+
+        public async Task UpdateInputCatalogAsync(string oldName, string newName, string type)
+        {
+            var trimmedOldName = oldName?.Trim() ?? "";
+            var trimmedNewName = newName?.Trim() ?? "";
+            var trimmedType = type?.Trim() ?? "";
+            await _inputCatalogCollection.UpdateOneAsync(
+                x => x.Name.ToLower() == trimmedOldName.ToLower() && x.Type.ToLower() == trimmedType.ToLower() && x.IsActive,
+                Builders<InputCatalog>.Update.Set(x => x.Name, trimmedNewName).Set(x => x.UpdatedAt, DateTime.UtcNow)
+            );
+        }
     }
 }

@@ -68,3 +68,7 @@ Uploads
 /FarmAPI.csproj.user
 /Properties/PublishProfiles
 /.config/dotnet-tools.json
+
+# EazyGrow local files
+EazyGrowFiles/
+

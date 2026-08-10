@@ -1,4 +1,4 @@
-﻿using FarmAPI.Models;
+using FarmAPI.Models;
 using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
 using FarmAPI.Utils;
@@ -162,6 +162,94 @@ namespace FarmAPI.Controllers
             await _fertilizerInventoryItemService.RemoveAsync(inventoryId);
 
             return NoContent();
+        }
+
+        [HttpGet("GetInputCatalogNames/{type}")]
+        public async Task<ActionResult<List<string>>> GetInputCatalogNames(string type)
+        {
+            if (string.IsNullOrEmpty(type))
+                return BadRequest("Type parameter is required.");
+
+            var names = await _fertilizerInventoryService.GetInputCatalogNamesAsync(type);
+            return Ok(names);
+        }
+
+        [HttpPost("CreateInputCatalog")]
+        public async Task<IActionResult> CreateInputCatalog([FromBody] CreateInputCatalogDto newCatalogDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(newCatalogDto.Name, newCatalogDto.Type);
+            if (existing != null)
+            {
+                var problem = new ProblemDetails
+                {
+                    Title = "Item already exists",
+                    Detail = $"An input catalog item with name '{newCatalogDto.Name}' and type '{newCatalogDto.Type}' already exists.",
+                    Status = StatusCodes.Status400BadRequest,
+                    Instance = HttpContext.Request.Path                 
+                };
+                return BadRequest(problem);
+            }
+
+            var newCatalog = new InputCatalog
+            {
+                Type = newCatalogDto.Type,
+                Name = newCatalogDto.Name,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _fertilizerInventoryService.CreateInputCatalogAsync(newCatalog);
+            return Ok(newCatalog);
+        }
+
+        [HttpDelete("RemoveInputCatalog/{type}/{name}")]
+        public async Task<IActionResult> RemoveInputCatalog(string type, string name)
+        {
+            Console.WriteLine($"[DEBUG] RemoveInputCatalog called with type: '{type}', name: '{name}'");
+            if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(name))
+                return BadRequest("Type and name parameters are required.");
+
+            var existing = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(name, type);
+            Console.WriteLine($"[DEBUG] Existing catalog item found: {existing != null}");
+            if (existing == null)
+                return NotFound();
+
+            await _fertilizerInventoryService.RemoveInputCatalogAsync(name, type);
+            return NoContent();
+        }
+
+        [HttpPut("UpdateInputCatalog")]
+        public async Task<IActionResult> UpdateInputCatalog([FromBody] UpdateInputCatalogDto updateDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(updateDto.OldName, updateDto.Type);
+            if (existing == null)
+                return NotFound("Original item not found.");
+
+            if (updateDto.OldName.ToLower() != updateDto.NewName.ToLower())
+            {
+                var newExisting = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(updateDto.NewName, updateDto.Type);
+                if (newExisting != null)
+                {
+                    var problem = new ProblemDetails
+                    {
+                        Title = "Item already exists",
+                        Detail = $"An input catalog item with name '{updateDto.NewName}' and type '{updateDto.Type}' already exists.",
+                        Status = StatusCodes.Status400BadRequest,
+                        Instance = HttpContext.Request.Path                 
+                    };
+                    return BadRequest(problem);
+                }
+            }
+
+            await _fertilizerInventoryService.UpdateInputCatalogAsync(updateDto.OldName, updateDto.NewName, updateDto.Type);
+            return Ok();
         }
     }
 }
