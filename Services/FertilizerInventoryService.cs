@@ -67,13 +67,22 @@ namespace FarmAPI.Services
         public async Task CreateInputCatalogAsync(InputCatalog newCatalog) =>
             await _inputCatalogCollection.InsertOneAsync(newCatalog);
 
-        public async Task RemoveInputCatalogAsync(string name, string type)
+        public async Task ActivateInputCatalogAsync(string name, string type)
         {
             var trimmedName = name?.Trim() ?? "";
             var trimmedType = type?.Trim() ?? "";
             await _inputCatalogCollection.UpdateOneAsync(
                 x => x.Name.ToLower() == trimmedName.ToLower() && x.Type.ToLower() == trimmedType.ToLower(),
-                Builders<InputCatalog>.Update.Set(x => x.IsActive, false).Set(x => x.UpdatedAt, DateTime.UtcNow)
+                Builders<InputCatalog>.Update.Set(x => x.IsActive, true).Set(x => x.UpdatedAt, DateTime.UtcNow)
+            );
+        }
+
+        public async Task RemoveInputCatalogAsync(string name, string type)
+        {
+            var trimmedName = name?.Trim() ?? "";
+            var trimmedType = type?.Trim() ?? "";
+            await _inputCatalogCollection.DeleteOneAsync(
+                x => x.Name.ToLower() == trimmedName.ToLower() && x.Type.ToLower() == trimmedType.ToLower()
             );
         }
 

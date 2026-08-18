@@ -183,14 +183,10 @@ namespace FarmAPI.Controllers
             var existing = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(newCatalogDto.Name, newCatalogDto.Type);
             if (existing != null)
             {
-                var problem = new ProblemDetails
-                {
-                    Title = "Item already exists",
-                    Detail = $"An input catalog item with name '{newCatalogDto.Name}' and type '{newCatalogDto.Type}' already exists.",
-                    Status = StatusCodes.Status400BadRequest,
-                    Instance = HttpContext.Request.Path                 
-                };
-                return BadRequest(problem);
+                existing.IsActive = true;
+                existing.UpdatedAt = DateTime.UtcNow;
+                await _fertilizerInventoryService.ActivateInputCatalogAsync(newCatalogDto.Name, newCatalogDto.Type);
+                return Ok(existing);
             }
 
             var newCatalog = new InputCatalog
