@@ -165,7 +165,7 @@ namespace FarmAPI.Controllers
         }
 
         [HttpGet("GetInputCatalogNames/{type}")]
-        public async Task<ActionResult<List<string>>> GetInputCatalogNames(string type)
+        public async Task<ActionResult<List<InputCatalogNameDto>>> GetInputCatalogNames(string type)
         {
             if (string.IsNullOrEmpty(type))
                 return BadRequest("Type parameter is required.");
@@ -193,6 +193,8 @@ namespace FarmAPI.Controllers
             {
                 Type = newCatalogDto.Type,
                 Name = newCatalogDto.Name,
+                UnitType = newCatalogDto.UnitType,
+                QuantityPerUnit = newCatalogDto.QuantityPerUnit,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -244,7 +246,7 @@ namespace FarmAPI.Controllers
                 }
             }
 
-            await _fertilizerInventoryService.UpdateInputCatalogAsync(updateDto.OldName, updateDto.NewName, updateDto.Type);
+            await _fertilizerInventoryService.UpdateInputCatalogAsync(updateDto.OldName, updateDto.NewName, updateDto.Type, updateDto.UnitType, updateDto.QuantityPerUnit);
             return Ok();
         }
     }

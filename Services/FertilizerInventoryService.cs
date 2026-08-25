@@ -48,11 +48,19 @@ namespace FarmAPI.Services
         public async Task RemoveAsync(string inventoryId) =>
             await _fertilizerInventoryCollection.DeleteOneAsync(x => x.InventoryId == inventoryId);
 
-        public async Task<List<string>> GetInputCatalogNamesAsync(string type) =>
-            await _inputCatalogCollection
+        public async Task<List<InputCatalogNameDto>> GetInputCatalogNamesAsync(string type)
+        {
+            var catalogs = await _inputCatalogCollection
                 .Find(x => x.Type == type && x.IsActive)
-                .Project(x => x.Name)
                 .ToListAsync();
+
+            return catalogs.Select(x => new InputCatalogNameDto
+            {
+                Name = x.Name,
+                UnitType = x.UnitType,
+                QuantityPerUnit = x.QuantityPerUnit
+            }).ToList();
+        }
 
         public async Task<InputCatalog?> GetInputCatalogByNameAndTypeAsync(string name, string type)
         {
@@ -86,14 +94,18 @@ namespace FarmAPI.Services
             );
         }
 
-        public async Task UpdateInputCatalogAsync(string oldName, string newName, string type)
+        public async Task UpdateInputCatalogAsync(string oldName, string newName, string type, string? unitType, double? quantityPerUnit)
         {
             var trimmedOldName = oldName?.Trim() ?? "";
             var trimmedNewName = newName?.Trim() ?? "";
             var trimmedType = type?.Trim() ?? "";
             await _inputCatalogCollection.UpdateOneAsync(
                 x => x.Name.ToLower() == trimmedOldName.ToLower() && x.Type.ToLower() == trimmedType.ToLower() && x.IsActive,
-                Builders<InputCatalog>.Update.Set(x => x.Name, trimmedNewName).Set(x => x.UpdatedAt, DateTime.UtcNow)
+                Builders<InputCatalog>.Update
+                    .Set(x => x.Name, trimmedNewName)
+                    .Set(x => x.UnitType, unitType)
+                    .Set(x => x.QuantityPerUnit, quantityPerUnit)
+                    .Set(x => x.UpdatedAt, DateTime.UtcNow)
             );
         }
     }

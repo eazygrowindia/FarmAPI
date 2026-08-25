@@ -23,5 +23,11 @@ namespace FarmAPI.Models
 
         [BsonElement("updatedAt")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        [BsonElement("unitType")]
+        public string? UnitType { get; set; }
+
+        [BsonElement("quantityPerUnit")]
+        public double? QuantityPerUnit { get; set; }
     }
 }
