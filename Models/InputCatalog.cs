@@ -29,5 +29,8 @@ namespace FarmAPI.Models
 
         [BsonElement("quantityPerUnit")]
         public double? QuantityPerUnit { get; set; }
+
+        [BsonElement("displayUnit")]
+        public string? DisplayUnit { get; set; }
     }
 }

@@ -7,5 +7,6 @@ namespace FarmAPI.Models
         public required string NewName { get; set; }
         public string? UnitType { get; set; }
         public double? QuantityPerUnit { get; set; }
+        public string? DisplayUnit { get; set; }
     }
 }

@@ -58,7 +58,8 @@ namespace FarmAPI.Services
             {
                 Name = x.Name,
                 UnitType = x.UnitType,
-                QuantityPerUnit = x.QuantityPerUnit
+                QuantityPerUnit = x.QuantityPerUnit,
+                DisplayUnit = x.DisplayUnit
             }).ToList();
         }
 
@@ -94,7 +95,7 @@ namespace FarmAPI.Services
             );
         }
 
-        public async Task UpdateInputCatalogAsync(string oldName, string newName, string type, string? unitType, double? quantityPerUnit)
+        public async Task UpdateInputCatalogAsync(string oldName, string newName, string type, string? unitType, double? quantityPerUnit, string? displayUnit)
         {
             var trimmedOldName = oldName?.Trim() ?? "";
             var trimmedNewName = newName?.Trim() ?? "";
@@ -105,6 +106,7 @@ namespace FarmAPI.Services
                     .Set(x => x.Name, trimmedNewName)
                     .Set(x => x.UnitType, unitType)
                     .Set(x => x.QuantityPerUnit, quantityPerUnit)
+                    .Set(x => x.DisplayUnit, displayUnit)
                     .Set(x => x.UpdatedAt, DateTime.UtcNow)
             );
         }

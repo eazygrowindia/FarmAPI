@@ -195,6 +195,7 @@ namespace FarmAPI.Controllers
                 Name = newCatalogDto.Name,
                 UnitType = newCatalogDto.UnitType,
                 QuantityPerUnit = newCatalogDto.QuantityPerUnit,
+                DisplayUnit = newCatalogDto.DisplayUnit,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -246,7 +247,7 @@ namespace FarmAPI.Controllers
                 }
             }
 
-            await _fertilizerInventoryService.UpdateInputCatalogAsync(updateDto.OldName, updateDto.NewName, updateDto.Type, updateDto.UnitType, updateDto.QuantityPerUnit);
+            await _fertilizerInventoryService.UpdateInputCatalogAsync(updateDto.OldName, updateDto.NewName, updateDto.Type, updateDto.UnitType, updateDto.QuantityPerUnit, updateDto.DisplayUnit);
             return Ok();
         }
     }
