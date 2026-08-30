@@ -165,7 +165,7 @@ namespace FarmAPI.Controllers
         }
 
         [HttpGet("GetInputCatalogNames/{type}")]
-        public async Task<ActionResult<List<string>>> GetInputCatalogNames(string type)
+        public async Task<ActionResult<List<InputCatalogNameDto>>> GetInputCatalogNames(string type)
         {
             if (string.IsNullOrEmpty(type))
                 return BadRequest("Type parameter is required.");
@@ -183,20 +183,19 @@ namespace FarmAPI.Controllers
             var existing = await _fertilizerInventoryService.GetInputCatalogByNameAndTypeAsync(newCatalogDto.Name, newCatalogDto.Type);
             if (existing != null)
             {
-                var problem = new ProblemDetails
-                {
-                    Title = "Item already exists",
-                    Detail = $"An input catalog item with name '{newCatalogDto.Name}' and type '{newCatalogDto.Type}' already exists.",
-                    Status = StatusCodes.Status400BadRequest,
-                    Instance = HttpContext.Request.Path                 
-                };
-                return BadRequest(problem);
+                existing.IsActive = true;
+                existing.UpdatedAt = DateTime.UtcNow;
+                await _fertilizerInventoryService.ActivateInputCatalogAsync(newCatalogDto.Name, newCatalogDto.Type);
+                return Ok(existing);
             }
 
             var newCatalog = new InputCatalog
             {
                 Type = newCatalogDto.Type,
                 Name = newCatalogDto.Name,
+                UnitType = newCatalogDto.UnitType,
+                QuantityPerUnit = newCatalogDto.QuantityPerUnit,
+                DisplayUnit = newCatalogDto.DisplayUnit,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -248,7 +247,7 @@ namespace FarmAPI.Controllers
                 }
             }
 
-            await _fertilizerInventoryService.UpdateInputCatalogAsync(updateDto.OldName, updateDto.NewName, updateDto.Type);
+            await _fertilizerInventoryService.UpdateInputCatalogAsync(updateDto.OldName, updateDto.NewName, updateDto.Type, updateDto.UnitType, updateDto.QuantityPerUnit, updateDto.DisplayUnit);
             return Ok();
         }
     }
