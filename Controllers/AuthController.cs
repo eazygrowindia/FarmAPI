@@ -1,4 +1,4 @@
-﻿using FarmAPI.Models;
+using FarmAPI.Models;
 using FarmAPI.Services;
 using FarmAPI.Services;
 using FarmAPI.Utils;
@@ -67,7 +67,7 @@ namespace FarmAPI.Controllers
                 HttpOnly = true,
                 Secure = true,  //for localhost/http set false
                 SameSite = SameSiteMode.None,   //For cross origin SameSiteMode.None, if same origin SameSiteMode.Strict
-                Expires = DateTime.UtcNow.AddHours(8),
+                Expires = DateTime.UtcNow.AddDays(30),
                 Path = "/"
             });
 
@@ -165,7 +165,7 @@ namespace FarmAPI.Controllers
                 HttpOnly = true,
                 Secure = true, // HTTPS only
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddHours(8),
+                Expires = DateTime.UtcNow.AddDays(30),
                 Path = "/"
             });
             Console.WriteLine($"LOGIN: Set cookie {token.Substring(0, 20)}...");
@@ -242,7 +242,7 @@ namespace FarmAPI.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddHours(8),
+                Expires = DateTime.UtcNow.AddDays(30),
                 Path = "/"
             });
 
@@ -271,7 +271,7 @@ namespace FarmAPI.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddHours(8),
+                Expires = DateTime.UtcNow.AddDays(30),
                 Path = "/"
             });
 

@@ -48,11 +48,20 @@ namespace FarmAPI.Services
         public async Task RemoveAsync(string inventoryId) =>
             await _fertilizerInventoryCollection.DeleteOneAsync(x => x.InventoryId == inventoryId);
 
-        public async Task<List<string>> GetInputCatalogNamesAsync(string type) =>
-            await _inputCatalogCollection
+        public async Task<List<InputCatalogNameDto>> GetInputCatalogNamesAsync(string type)
+        {
+            var catalogs = await _inputCatalogCollection
                 .Find(x => x.Type == type && x.IsActive)
-                .Project(x => x.Name)
                 .ToListAsync();
+
+            return catalogs.Select(x => new InputCatalogNameDto
+            {
+                Name = x.Name,
+                UnitType = x.UnitType,
+                QuantityPerUnit = x.QuantityPerUnit,
+                DisplayUnit = x.DisplayUnit
+            }).ToList();
+        }
 
         public async Task<InputCatalog?> GetInputCatalogByNameAndTypeAsync(string name, string type)
         {
@@ -67,24 +76,38 @@ namespace FarmAPI.Services
         public async Task CreateInputCatalogAsync(InputCatalog newCatalog) =>
             await _inputCatalogCollection.InsertOneAsync(newCatalog);
 
-        public async Task RemoveInputCatalogAsync(string name, string type)
+        public async Task ActivateInputCatalogAsync(string name, string type)
         {
             var trimmedName = name?.Trim() ?? "";
             var trimmedType = type?.Trim() ?? "";
             await _inputCatalogCollection.UpdateOneAsync(
                 x => x.Name.ToLower() == trimmedName.ToLower() && x.Type.ToLower() == trimmedType.ToLower(),
-                Builders<InputCatalog>.Update.Set(x => x.IsActive, false).Set(x => x.UpdatedAt, DateTime.UtcNow)
+                Builders<InputCatalog>.Update.Set(x => x.IsActive, true).Set(x => x.UpdatedAt, DateTime.UtcNow)
             );
         }
 
-        public async Task UpdateInputCatalogAsync(string oldName, string newName, string type)
+        public async Task RemoveInputCatalogAsync(string name, string type)
+        {
+            var trimmedName = name?.Trim() ?? "";
+            var trimmedType = type?.Trim() ?? "";
+            await _inputCatalogCollection.DeleteOneAsync(
+                x => x.Name.ToLower() == trimmedName.ToLower() && x.Type.ToLower() == trimmedType.ToLower()
+            );
+        }
+
+        public async Task UpdateInputCatalogAsync(string oldName, string newName, string type, string? unitType, double? quantityPerUnit, string? displayUnit)
         {
             var trimmedOldName = oldName?.Trim() ?? "";
             var trimmedNewName = newName?.Trim() ?? "";
             var trimmedType = type?.Trim() ?? "";
             await _inputCatalogCollection.UpdateOneAsync(
                 x => x.Name.ToLower() == trimmedOldName.ToLower() && x.Type.ToLower() == trimmedType.ToLower() && x.IsActive,
-                Builders<InputCatalog>.Update.Set(x => x.Name, trimmedNewName).Set(x => x.UpdatedAt, DateTime.UtcNow)
+                Builders<InputCatalog>.Update
+                    .Set(x => x.Name, trimmedNewName)
+                    .Set(x => x.UnitType, unitType)
+                    .Set(x => x.QuantityPerUnit, quantityPerUnit)
+                    .Set(x => x.DisplayUnit, displayUnit)
+                    .Set(x => x.UpdatedAt, DateTime.UtcNow)
             );
         }
     }
