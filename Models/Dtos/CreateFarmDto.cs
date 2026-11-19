@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -17,7 +18,53 @@ namespace FarmAPI.Models.Dtos
         public bool? IsSolarPowerAvailable { get; set; }
         public string? MotorCapacity { get; set; }
         public string AdditionalWaterSource { get; set; }
-        public string? WaterTestCertificateUrl { get; set; }
+
+        private string? _waterTestCertificateUrl;
+
+        [JsonPropertyName("waterTestCertificateUrl")]
+        public string? WaterTestCertificateUrl
+        {
+            get => _waterTestCertificateUrl;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                    _waterTestCertificateUrl = value;
+            }
+        }
+
+        [JsonPropertyName("waterTestCertificate")]
+        public string? WaterTestCertificate
+        {
+            get => _waterTestCertificateUrl;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                    _waterTestCertificateUrl = value;
+            }
+        }
+
+        [JsonPropertyName("waterCertificate")]
+        public string? WaterCertificate
+        {
+            get => _waterTestCertificateUrl;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                    _waterTestCertificateUrl = value;
+            }
+        }
+
+        [JsonPropertyName("waterCertificateUrl")]
+        public string? WaterCertificateUrl
+        {
+            get => _waterTestCertificateUrl;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                    _waterTestCertificateUrl = value;
+            }
+        }
+
         public bool? IsSinglePhasePower { get; set; }
         public bool? IsThreePhasePower { get; set; }
         //public PowerTimeSpan GridPowerUnAvailability { get; set; }

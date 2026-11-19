@@ -55,6 +55,7 @@ namespace FarmAPI
             builder.Services.AddScoped<FertilizerInventoryItemService>();
             builder.Services.AddScoped<DiseaseControlInventoryService>();
             builder.Services.AddScoped<DiseaseControlInventoryItemService>();
+            builder.Services.AddScoped<FarmNoteService>();
 
             builder.Services.AddScoped<UserRepository>();
             builder.Services.AddScoped<JwtService>();

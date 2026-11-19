@@ -1,4 +1,4 @@
-﻿using FarmAPI.Models;
+using FarmAPI.Models;
 using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -132,7 +132,9 @@ namespace FarmAPI.Controllers
                 IsSolarPowerAvailable = newFarmDto.IsSolarPowerAvailable,
                 MotorCapacity = newFarmDto.MotorCapacity,
                 AdditionalWaterSource = newFarmDto.AdditionalWaterSource,
-                WaterTestCertificateUrl = newFarmDto.WaterTestCertificateUrl,
+                WaterTestCertificateUrl = !string.IsNullOrWhiteSpace(newFarmDto.WaterTestCertificateUrl) 
+                    ? newFarmDto.WaterTestCertificateUrl 
+                    : newFarmDto.WaterTestCertificate,
                 IsSinglePhasePower = newFarmDto.IsSinglePhasePower,
                 IsThreePhasePower = newFarmDto.IsThreePhasePower,
                 //GridPowerUnAvailability = newFarmDto.GridPowerUnAvailability,
@@ -191,7 +193,9 @@ namespace FarmAPI.Controllers
             existingFarm.IsSolarPowerAvailable = updatedFarmDto.IsSolarPowerAvailable;
             existingFarm.MotorCapacity = updatedFarmDto.MotorCapacity;
             existingFarm.AdditionalWaterSource = updatedFarmDto.AdditionalWaterSource;
-            existingFarm.WaterTestCertificateUrl = updatedFarmDto.WaterTestCertificateUrl;
+            existingFarm.WaterTestCertificateUrl = !string.IsNullOrWhiteSpace(updatedFarmDto.WaterTestCertificateUrl)
+                ? updatedFarmDto.WaterTestCertificateUrl
+                : updatedFarmDto.WaterTestCertificate;
             existingFarm.IsSinglePhasePower = updatedFarmDto.IsSinglePhasePower;
             existingFarm.IsThreePhasePower = updatedFarmDto.IsThreePhasePower;
             //existingFarm.GridPowerUnAvailability = updatedFarmDto.GridPowerUnAvailability;

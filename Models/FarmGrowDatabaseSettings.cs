@@ -20,5 +20,6 @@ namespace FarmAPI.Models
         public string DiseaseControlInventoryCollectionName { get; set; } = null!;
         public string DiseaseControlInventoryItemCollectionName { get; set; } = null!;
         public string InputCatalogCollectionName { get; set; } = null!;
+        public string FarmNotesCollectionName { get; set; } = null!;
     }
 }
