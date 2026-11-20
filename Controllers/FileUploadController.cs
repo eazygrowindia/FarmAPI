@@ -1,4 +1,4 @@
-﻿using FarmAPI.Models;
+using FarmAPI.Models;
 using FarmAPI.Models.Dtos;
 using FarmAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +23,7 @@ namespace FarmAPI.Controllers
 
         /// <summary>
         /// Uploads a file to the server and returns the file name and path.
+        /// Supports images, audio, and documents (PDF, etc. for water test certificates).
         /// </summary>
         /// <param name="file"></param>
         /// <returns>fileName, fullPath</returns>
@@ -34,7 +35,6 @@ namespace FarmAPI.Controllers
                 return BadRequest("No file uploaded.");
             }
 
-            //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
             var uploadsFolder = fileStoreSettings.BaseFolderPath;
             if (!Directory.Exists(uploadsFolder))
             {
@@ -45,21 +45,27 @@ namespace FarmAPI.Controllers
             string filePath = string.Empty;
             string fullFilePath = string.Empty;
 
-            if (file.ContentType.Contains("image"))
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            var audioExtensions = new[] { ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".webm" };
+
+            if (file.ContentType.Contains("image") || imageExtensions.Contains(extension))
             {
-                filePath = Path.Combine(uploadsFolder, fileStoreSettings.ImagesFolderName);
-                if (!Directory.Exists(filePath))
-                {
-                    Directory.CreateDirectory(filePath);
-                }
+                filePath = Path.Combine(uploadsFolder, fileStoreSettings.ImagesFolderName ?? "Images");
             } 
-            else if (file.ContentType.Contains("audio"))
+            else if (file.ContentType.Contains("audio") || audioExtensions.Contains(extension))
             {
-                filePath = Path.Combine(uploadsFolder, fileStoreSettings.AudioFolderName);
-                if (!Directory.Exists(filePath))
-                {
-                    Directory.CreateDirectory(filePath);
-                }
+                filePath = Path.Combine(uploadsFolder, fileStoreSettings.AudioFolderName ?? "Audio");
+            }
+            else
+            {
+                // Documents & certificates (e.g. PDF, doc, docx for water test certificates)
+                filePath = Path.Combine(uploadsFolder, "Documents");
+            }
+
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
             }
 
             fullFilePath = Path.Combine(filePath, uniqueFileName);
@@ -69,15 +75,14 @@ namespace FarmAPI.Controllers
                 await file.CopyToAsync(stream);
             }
 
-
             return Ok(new { fileName = uniqueFileName, fullPath = fullFilePath });
         }
 
         /// <summary>
         /// Downloads a file from the server by file name.
-        /// Supports image, audio, and voice files.
+        /// Supports image, audio, voice, and document files (including water test certificates).
         /// </summary>
-        /// <param name="fileName">The file name with extension (e.g., ffdac3fc-b177-46a9-8a51-5e8a60c8b0bd.jpg)</param>
+        /// <param name="fileName">The file name with extension (e.g., ffdac3fc-b177-46a9-8a51-5e8a60c8b0bd.jpg or certificate.pdf)</param>
         /// <returns>The file content with appropriate content type</returns>
         [HttpGet("download/{fileName}")]
         public async Task<IActionResult> DownloadFile(string fileName)
@@ -88,24 +93,47 @@ namespace FarmAPI.Controllers
             }
 
             var uploadsFolder = fileStoreSettings.BaseFolderPath;
-            string filePath = string.Empty;
+            var cleanFileName = Path.GetFileName(fileName);
+            var extension = Path.GetExtension(cleanFileName).ToLower();
 
-            // Determine file type and location based on extension
-            var extension = Path.GetExtension(fileName).ToLower();
             var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
             var audioExtensions = new[] { ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".webm" };
+            var documentExtensions = new[] { ".pdf", ".doc", ".docx", ".txt", ".csv", ".xlsx" };
+
+            string filePath = string.Empty;
 
             if (imageExtensions.Contains(extension))
             {
-                filePath = Path.Combine(uploadsFolder, fileStoreSettings.ImagesFolderName, fileName);
+                filePath = Path.Combine(uploadsFolder, fileStoreSettings.ImagesFolderName ?? "Images", cleanFileName);
             }
             else if (audioExtensions.Contains(extension))
             {
-                filePath = Path.Combine(uploadsFolder, fileStoreSettings.AudioFolderName, fileName);
+                filePath = Path.Combine(uploadsFolder, fileStoreSettings.AudioFolderName ?? "Audio", cleanFileName);
+            }
+            else if (documentExtensions.Contains(extension))
+            {
+                filePath = Path.Combine(uploadsFolder, "Documents", cleanFileName);
+                if (!System.IO.File.Exists(filePath))
+                {
+                    // Fallback locations in case the document was saved directly under BaseFolderPath or current directory
+                    var baseFallback = Path.Combine(uploadsFolder, cleanFileName);
+                    if (System.IO.File.Exists(baseFallback))
+                    {
+                        filePath = baseFallback;
+                    }
+                    else
+                    {
+                        var rootFallback = Path.Combine(Directory.GetCurrentDirectory(), cleanFileName);
+                        if (System.IO.File.Exists(rootFallback))
+                        {
+                            filePath = rootFallback;
+                        }
+                    }
+                }
             }
             else
             {
-                return BadRequest("Unsupported file type. Only image and audio files are allowed.");
+                return BadRequest("Unsupported file type.");
             }
 
             if (!System.IO.File.Exists(filePath))
@@ -118,7 +146,7 @@ namespace FarmAPI.Controllers
 
             // Read the file and return it
             var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-            return File(fileBytes, contentType, fileName);
+            return File(fileBytes, contentType, cleanFileName);
         }
 
         /// <summary>
@@ -142,6 +170,12 @@ namespace FarmAPI.Controllers
                 ".flac" => "audio/flac",
                 ".ogg" => "audio/ogg",
                 ".webm" => "audio/webm",
+                // Document types
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".txt" => "text/plain",
+                ".csv" => "text/csv",
                 _ => "application/octet-stream"
             };
         }
